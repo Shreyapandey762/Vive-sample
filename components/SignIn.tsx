@@ -1,56 +1,136 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  FlatList,
+  StyleSheet,
+  Image,
+  Alert,
+} from 'react-native';
+import Vive from '../assets/Vive';
 
-type RootStackParamList = {
-  SplashScreen: undefined;
-  SignIn: undefined;
-  Home: undefined; // Add more screens as needed
-};
+const countries = [
+  {code: '+1', name: 'USA'},
+  {code: '+91', name: 'India'},
+  {code: '+44', name: 'UK'},
+  {code: '+61', name: 'Australia'},
+];
 
-type SignInScreenProps = {
-  navigation: StackNavigationProp<RootStackParamList, "SignIn">;
-};
+const SignIn: React.FC = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-const SignIn: React.FC<SignInScreenProps> = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const handleSignIn = async () => {
+    if (phoneNumber.length < 9 || phoneNumber.length > 13) {
+      Alert.alert(
+        'Validation Error',
+        'Phone number must be between 9 and 13 characters.',
+      );
+      return;
+    }
+    if (password.length < 8) {
+      Alert.alert(
+        'Validation Error',
+        'Password must be at least 8 characters long.',
+      );
+      return;
+    }
 
-  const handleSignIn = () => {
-    if (email === "test@example.com" && password === "password") {
-      Alert.alert("Login Successful!");
-      navigation.navigate("Home"); // Navigate to Home screen (if it exists)
-    } else {
-      Alert.alert("Invalid email or password");
+    try {
+      const response = await fetch('/api/v1/users/sign_in', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mobile: phoneNumber,
+          area_code: selectedCountry,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Success', 'Signed in successfully!');
+      } else {
+        Alert.alert('Error', data.message || 'Sign In failed');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Something went wrong. Please try again.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign In</Text>
+      <TouchableOpacity style={styles.signInLink} onPress={handleSignIn}>
+        <Text style={styles.signInText}>Sign In</Text>
+      </TouchableOpacity>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+      <Vive color="black" scale={0.4} style={styles.logo} />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+      <View style={styles.phoneContainer}>
+        <TouchableOpacity
+          style={styles.countrySelector}
+          onPress={() => setModalVisible(true)}>
+          <Text style={styles.countryText}>{selectedCountry.code}</Text>
+        </TouchableOpacity>
+        <TextInput
+          style={styles.phoneInput}
+          placeholder="Phone Number"
+          keyboardType="phone-pad"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+        />
+      </View>
 
-      <Button title="Sign In" onPress={handleSignIn} />
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={[styles.passwordInput, {color: '#333'}]}
+          placeholder="Password"
+          secureTextEntry={!showPassword}
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity
+          style={styles.showButton}
+          onPress={() => setShowPassword(!showPassword)}>
+          <Text style={styles.showButtonText}>
+            {showPassword ? 'Hide' : 'Show'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-      <Text style={styles.registerText} onPress={() => navigation.navigate("SplashScreen")}>
-        Back to Splash
-      </Text>
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <FlatList
+            data={countries}
+            keyExtractor={item => item.code}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                style={styles.modalItem}
+                onPress={() => {
+                  setSelectedCountry(item);
+                  setModalVisible(false);
+                }}>
+                <Text style={styles.modalText}>
+                  {item.name} ({item.code})
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -58,29 +138,85 @@ const SignIn: React.FC<SignInScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
     padding: 20,
-    backgroundColor: "#fff",
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
+  signInLink: {
+    position: 'absolute',
+    top: 30,
+    right: 20,
   },
-  input: {
-    width: "100%",
-    height: 50,
+  signInText: {
+    fontSize: 16,
+    color: 'light-grey',
+    fontWeight: 'bold',
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    marginBottom: 30,
+  },
+  phoneContainer: {
+    flexDirection: 'row',
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    marginBottom: 15,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    width: '100%',
   },
-  registerText: {
-    marginTop: 15,
-    color: "blue",
-    textDecorationLine: "underline",
+  countrySelector: {
+    paddingHorizontal: 10,
+    justifyContent: 'center',
+  },
+  countryText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  phoneInput: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 10,
+    width: '100%',
+    marginTop: 20,
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+  },
+  showButton: {
+    paddingHorizontal: 10,
+    justifyContent: 'center',
+  },
+  showButtonText: {
+    fontSize: 16,
+    color: '#3498db',
+    fontWeight: 'bold',
+  },
+  modalContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+  },
+  modalItem: {
+    paddingVertical: 15,
+  },
+  modalText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
 
