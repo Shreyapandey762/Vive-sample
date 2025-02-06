@@ -11,6 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import Vive from '../assets/Vive';
+import axios from 'axios';
 
 const countries = [
   {code: '+1', name: 'USA'},
@@ -42,28 +43,30 @@ const SignIn: React.FC = () => {
       return;
     }
 
+    const formData = new FormData();
+    formData.append('area_code', '+91');
+    formData.append('mobile', '7000335933');
+    formData.append('password', 'password');
+
     try {
-      const response = await fetch('/api/v1/users/sign_in', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await axios.post(
+        'https://staging.gotvive.com/api/v1/users/sign_in',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept':'application/json'          
+          },
         },
-        body: JSON.stringify({
-          mobile: phoneNumber,
-          area_code: selectedCountry,
-          password: password,
-        }),
-      });
+      );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        Alert.alert('Success', 'Signed in successfully!');
-      } else {
-        Alert.alert('Error', data.message || 'Sign In failed');
-      }
+      console.log('Response Data:', response.data);
     } catch (error) {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      if (axios.isAxiosError(error)) {
+        console.error('Axios Error:', error.response?.data || error.message);
+      } else {
+        console.error('Unexpected Error:', error);
+      }
     }
   };
 
