@@ -31,7 +31,7 @@ const NewTransactionScreen: React.FC<Props> = ({ route, navigation }) => {
   const handleSaveTransaction = () => {
     if (subtitle && image) {
       const newTransaction = { title, subtitle, image };
-      navigation.navigate('LandingScreen', { newTransaction });
+      navigation.navigate('LandingScreen', { newTransaction : newTransaction});
       Alert.alert('Success', 'Transaction saved!');
     } else {
       Alert.alert('Error', 'Please provide subtitle and image.');
@@ -40,7 +40,7 @@ const NewTransactionScreen: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Create New Transaction</Text>
+      <Text style={styles.header}>Selling Transaction</Text>
       <Text style={styles.title}>{title}</Text>
 
       <TextInput
