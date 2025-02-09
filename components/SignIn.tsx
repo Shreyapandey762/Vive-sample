@@ -11,12 +11,15 @@ import {
   Alert,
 } from 'react-native';
 import Vive from '../assets/Vive';
+import axios from 'axios';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../App';
 
 const countries = [
   {code: '+1', name: 'USA'},
   {code: '+91', name: 'India'},
   {code: '+44', name: 'UK'},
-  {code: '+61', name: 'Australia'},
 ];
 
 const SignIn: React.FC = () => {
@@ -25,6 +28,7 @@ const SignIn: React.FC = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   const handleSignIn = async () => {
     if (phoneNumber.length < 9 || phoneNumber.length > 13) {
@@ -42,30 +46,39 @@ const SignIn: React.FC = () => {
       return;
     }
 
+    const formData = new FormData();
+    formData.append('area_code', selectedCountry.code);
+    formData.append('mobile', phoneNumber);
+    formData.append('password', password);
     try {
-      const response = await fetch('/api/v1/users/sign_in', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const response = await axios.post(
+        'https://staging.gotvive.com/api/v1/users/sign_in',
+        {
+          area_code: selectedCountry.code,
           mobile: phoneNumber,
-          area_code: selectedCountry,
           password: password,
-        }),
-      });
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+        }
+      );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        Alert.alert('Success', 'Signed in successfully!');
-      } else {
-        Alert.alert('Error', data.message || 'Sign In failed');
-      }
+      console.log('Response Data:', response.data);
+      navigation.navigate('LandingScreen');
     } catch (error) {
-      Alert.alert('Error', 'Something went wrong. Please try again.');
+      if (axios.isAxiosError(error)) {
+        Alert.alert('Sign-In Failed', error.response?.data?.message || 'An error occurred');
+        console.error('Axios Error:', error.response?.data || error.message);
+      } else {
+        Alert.alert('Unexpected Error', 'Something went wrong. Please try again.');
+        console.error('Unexpected Error:', error);
+      }
     }
   };
+
 
   return (
     <View style={styles.container}>
