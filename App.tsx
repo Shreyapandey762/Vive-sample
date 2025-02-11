@@ -9,10 +9,13 @@ import SignIn from './components/SignIn';
 import { UserProvider } from './context/UserContext';
 import UserProfile from './components/UserProfile';
 import { store } from './store';
+import { Transaction } from './store/transactionsSlice';
+
+
 
 export type RootStackParamList = {
-  LandingScreen: { newTransaction?: { title: string; subtitle: string; image: string } } | undefined;  
-  NewTransactionScreen: { title: string };
+  LandingScreen: { newTransaction?: Transaction } | undefined;  
+  NewTransactionScreen: {transaction: Transaction};
   SplashScreen: undefined;
   SignIn: undefined;
   UserProfile: undefined;

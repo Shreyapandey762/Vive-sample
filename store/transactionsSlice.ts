@@ -1,10 +1,11 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
-interface Transaction {
+export type Transaction = {
+  id?: Number;
   title: string;
-  subtitle: string;
-  image: string;
-}
+  subtitle?: string | null;
+  image?: string | null;
+};
 
 interface TransactionsState {
   transactions: Transaction[];
@@ -24,5 +25,5 @@ const transactionsSlice = createSlice({
   },
 });
 
-export const { addTransaction } = transactionsSlice.actions;
+export const {addTransaction} = transactionsSlice.actions;
 export default transactionsSlice.reducer;

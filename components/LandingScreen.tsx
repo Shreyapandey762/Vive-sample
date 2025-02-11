@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -9,14 +9,16 @@ import {
   Alert,
   FlatList,
   Image,
+  Button,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../App';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import { RootStackParamList} from '../App';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store';
 import Vive from '../assets/Vive';
+import { Transaction } from '../store/transactionsSlice';
 
 type LandingScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -28,11 +30,13 @@ const LandingScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [transactionTitle, setTransactionTitle] = useState('');
 
-  const transactions = useSelector((state: RootState) => state.transactions.transactions);
+  const transactions = useSelector(
+    (state: RootState) => state.transactions.transactions,
+  );
 
   const handleCreate = () => {
     if (transactionTitle) {
-      navigation.navigate('NewTransactionScreen', { title: transactionTitle });
+      navigation.navigate('NewTransactionScreen', {transaction: {id: Date.now(),title: transactionTitle} as Transaction});
       setModalVisible(false);
       setTransactionTitle('');
     } else {
@@ -53,7 +57,9 @@ const LandingScreen: React.FC = () => {
 
       <View style={styles.transactionContainer}>
         <Text style={styles.transactionText}>Selling</Text>
-        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.addButton}>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={styles.addButton}>
           <View style={styles.plusIconContainer}>
             <Icon name="plus" size={20} color="black" />
           </View>
@@ -63,37 +69,53 @@ const LandingScreen: React.FC = () => {
       <FlatList
         data={transactions}
         horizontal
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.transactionItem}>
-            <Image source={{ uri: item.image }} style={styles.image} />
-            <Text>{item.title}</Text>
-            <Text>{item.subtitle}</Text>
-          </View>
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({item}) => (
+          <TouchableOpacity onPress={() =>navigation.navigate('NewTransactionScreen', {transaction: item})}>
+            <View style={styles.transactionItem}>
+              <Image source={{uri: item.image!}} style={styles.image} />
+              <Text>{item.title}</Text>
+              <Text>{item.subtitle}</Text>
+            </View>
+          </TouchableOpacity>
         )}
       />
 
-      <Modal visible={modalVisible}  animationType='fade' transparent={true}  onRequestClose={() => setModalVisible(false)}>
+      <Modal
+        visible={modalVisible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
-        <View style={styles.modalBox}>
-          <Text style={styles.modalHeader}>New Transaction</Text>
-          <TextInput
-            placeholder="The Michelle's Home"
-            placeholderTextColor={'grey'}
-            value={transactionTitle}
-            onChangeText={setTransactionTitle}
-            style={styles.textInput}
-          />
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={handleCreate} disabled={transactionTitle.length==0}>
-              <Text style={{...styles.buttonText,color: transactionTitle.length===0 ? 'grey':'blue'}}>Create</Text>
-            
-            </TouchableOpacity>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalHeader}>New Transaction</Text>
+            <TextInput
+              placeholder="The Michelle's Home"
+              placeholderTextColor={'grey'}
+              value={transactionTitle}
+              onChangeText={setTransactionTitle}
+              style={styles.textInput}
+            />
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => setModalVisible(false)}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleCreate}
+                disabled={transactionTitle.length == 0}>
+                <Text
+                  style={{
+                    ...styles.buttonText,
+                    color: transactionTitle.length === 0 ? 'grey' : 'blue',
+                  }}>
+                  Create
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
         </View>
       </Modal>
     </View>
@@ -162,7 +184,7 @@ const styles = StyleSheet.create({
     padding: 20,
     elevation: 1,
     margin: 5,
-    height: '30%'
+    height: '30%',
   },
   image: {
     width: 100,
@@ -176,7 +198,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-   // backgroundColor: '#ffffff',
+    // backgroundColor: '#ffffff',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalBox: {
@@ -184,10 +206,10 @@ const styles = StyleSheet.create({
     height: '25%',
     backgroundColor: '#ffffff',
     padding: 5,
-  
+
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5, 
+    elevation: 5,
   },
   modalHeader: {
     fontSize: 20,
@@ -212,7 +234,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: 'white',
     paddingVertical: 10,
-    paddingHorizontal: 10,  
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
