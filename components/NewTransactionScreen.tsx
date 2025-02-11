@@ -4,8 +4,13 @@ import { launchImageLibrary, ImagePickerResponse } from 'react-native-image-pick
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../App';
+import { useDispatch } from 'react-redux';
+import { addTransaction } from '../store/transactionsSlice';
 
-type NewTransactionScreenNavigationProp = StackNavigationProp<RootStackParamList, 'NewTransactionScreen'>;
+type NewTransactionScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'NewTransactionScreen'
+>;
 
 interface Props {
   route: RouteProp<RootStackParamList, 'NewTransactionScreen'>;
@@ -16,6 +21,7 @@ const NewTransactionScreen: React.FC<Props> = ({ route, navigation }) => {
   const { title } = route.params;
   const [subtitle, setSubtitle] = useState<string>('');
   const [image, setImage] = useState<string | null>(null);
+  const dispatch = useDispatch();
 
   const handleImagePick = async () => {
     const result: ImagePickerResponse = await launchImageLibrary({
@@ -30,8 +36,8 @@ const NewTransactionScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const handleSaveTransaction = () => {
     if (subtitle && image) {
-      const newTransaction = { title, subtitle, image };
-      navigation.navigate('LandingScreen', { newTransaction : newTransaction});
+      dispatch(addTransaction({ title, subtitle, image }));
+      navigation.navigate('LandingScreen');
       Alert.alert('Success', 'Transaction saved!');
     } else {
       Alert.alert('Error', 'Please provide subtitle and image.');
@@ -43,12 +49,7 @@ const NewTransactionScreen: React.FC<Props> = ({ route, navigation }) => {
       <Text style={styles.header}>Selling Transaction</Text>
       <Text style={styles.title}>{title}</Text>
 
-      <TextInput
-        placeholder="Enter subtitle"
-        value={subtitle}
-        onChangeText={setSubtitle}
-        style={styles.textInput}
-      />
+      <TextInput placeholder="Enter subtitle" value={subtitle} onChangeText={setSubtitle} style={styles.textInput} />
 
       <Button title="Pick an image" onPress={handleImagePick} />
       {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
@@ -56,8 +57,7 @@ const NewTransactionScreen: React.FC<Props> = ({ route, navigation }) => {
       <TouchableOpacity
         style={[styles.saveButton, { backgroundColor: subtitle && image ? '#007bff' : '#c0c0c0' }]}
         onPress={handleSaveTransaction}
-        disabled={!subtitle || !image}
-      >
+        disabled={!subtitle || !image}>
         <Text style={styles.saveButtonText}>Save Transaction</Text>
       </TouchableOpacity>
     </View>

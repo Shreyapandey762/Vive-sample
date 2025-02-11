@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,33 +11,24 @@ import {
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../App';
-import Vive from '../assets/Vive';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store';
 
 type LandingScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   'LandingScreen'
 >;
-type LandingScreenRouteProp = RouteProp<RootStackParamList, 'LandingScreen'>;
 
 const LandingScreen: React.FC = () => {
   const navigation = useNavigation<LandingScreenNavigationProp>();
-  const route = useRoute<LandingScreenRouteProp>();
   const [modalVisible, setModalVisible] = useState(false);
   const [transactionTitle, setTransactionTitle] = useState('');
-  const [transactions, setTransactions] = useState<any[]>([]);
 
-  useEffect(() => {
-    if (route.params?.newTransaction) {
-      setTransactions((prevTransactions) => [
-        ...prevTransactions,
-        route.params?.newTransaction,
-      ]);
-      navigation.setParams({ newTransaction: undefined });
-    }
-  }, [route.params?.newTransaction, navigation]);
+  // Get transactions from Redux
+  const transactions = useSelector((state: RootState) => state.transactions.transactions);
 
   const handleCreate = () => {
     if (transactionTitle) {
@@ -51,22 +42,17 @@ const LandingScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Profile Icon */}
       <TouchableOpacity
         style={styles.profileIcon}
         onPress={() => navigation.navigate('UserProfile')}>
         <Icon name="user-circle" size={30} color="black" />
       </TouchableOpacity>
 
-      <Vive color="black" scale={0.3} style={styles.logo} />
       <Text style={styles.header}>Good Evening!</Text>
 
       <View style={styles.transactionContainer}>
         <Text style={styles.transactionText}>Selling</Text>
-
-        <TouchableOpacity
-          onPress={() => setModalVisible(true)}
-          style={styles.addButton}>
+        <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.addButton}>
           <View style={styles.plusIconContainer}>
             <Icon name="plus" size={20} color="black" />
           </View>
@@ -85,10 +71,7 @@ const LandingScreen: React.FC = () => {
         )}
       />
 
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}>
+      <Modal visible={modalVisible} animationType="slide" onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalHeader}>New Transaction</Text>
           <TextInput
@@ -98,9 +81,7 @@ const LandingScreen: React.FC = () => {
             style={styles.textInput}
           />
           <View style={styles.buttonsContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => setModalVisible(false)}>
+            <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
               <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={handleCreate}>
@@ -112,7 +93,6 @@ const LandingScreen: React.FC = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
