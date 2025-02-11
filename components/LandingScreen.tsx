@@ -47,7 +47,7 @@ const LandingScreen: React.FC = () => {
         onPress={() => navigation.navigate('UserProfile')}>
         <Icon name="user-circle" size={30} color="black" />
       </TouchableOpacity>
-      <Vive color="black" scale={0.4} style={styles.logo} />
+      <Vive color="black" scale={0.2} style={styles.logo} />
 
       <Text style={styles.header}>Good Evening!</Text>
 
@@ -78,7 +78,8 @@ const LandingScreen: React.FC = () => {
         <View style={styles.modalBox}>
           <Text style={styles.modalHeader}>New Transaction</Text>
           <TextInput
-            placeholder="Enter Transaction Title"
+            placeholder="The Michelle's Home"
+            placeholderTextColor={'grey'}
             value={transactionTitle}
             onChangeText={setTransactionTitle}
             style={styles.textInput}
@@ -87,8 +88,9 @@ const LandingScreen: React.FC = () => {
             <TouchableOpacity style={styles.button} onPress={() => setModalVisible(false)}>
               <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={handleCreate}>
-              <Text style={styles.buttonText}>Create</Text>
+            <TouchableOpacity style={styles.button} onPress={handleCreate} disabled={transactionTitle.length==0}>
+              <Text style={{...styles.buttonText,color: transactionTitle.length===0 ? 'grey':'blue'}}>Create</Text>
+            
             </TouchableOpacity>
           </View>
         </View>
@@ -118,7 +120,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginTop: 20,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   transactionContainer: {
     flexDirection: 'row',
@@ -178,11 +180,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalBox: {
-    width: '80%',
-    height: '40%',
+    width: '90%',
+    height: '25%',
     backgroundColor: '#ffffff',
-    padding: 20,
-    borderRadius: 10,
+    padding: 5,
+  
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5, 
@@ -190,8 +192,8 @@ const styles = StyleSheet.create({
   modalHeader: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+    marginBottom: 10,
+    textAlign: 'left',
   },
   textInput: {
     borderBottomWidth: 1,
@@ -203,20 +205,19 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     width: '80%',
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: 'white',
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    paddingHorizontal: 10,  
     alignItems: 'center',
     justifyContent: 'center',
   },
   buttonText: {
-    color: '#ffffff',
+    color: 'blue',
     fontSize: 16,
     fontWeight: '600',
   },

@@ -85,57 +85,63 @@ const SignIn: React.FC = () => {
       <TouchableOpacity style={styles.signInLink} onPress={handleSignIn}>
         <Text style={styles.signInText}>Sign In</Text>
       </TouchableOpacity>
-
-      <Vive color="black" scale={0.4} style={styles.logo} />
-
-      <View style={styles.phoneContainer}>
+  
+      <Vive color="black" scale={0.3} style={styles.logo} />
+      <View style={styles.inputContainer}>
         <TouchableOpacity
           style={styles.countrySelector}
-          onPress={() => setModalVisible(true)}>
+          onPress={() => setModalVisible(true)}
+        >
           <Text style={styles.countryText}>{selectedCountry.code}</Text>
         </TouchableOpacity>
         <TextInput
-          style={styles.phoneInput}
           placeholder="Phone Number"
-          keyboardType="phone-pad"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
+          placeholderTextColor="grey"
+          style={styles.phoneInput}
+          keyboardType="phone-pad"
         />
       </View>
-
-      <View style={styles.passwordContainer}>
+  
+     \
+      <View style={styles.inputContainer}>
         <TextInput
-          style={[styles.passwordInput, {color: '#333'}]}
           placeholder="Password"
-          secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
+          placeholderTextColor="grey"
+          style={styles.passwordInput}
+          secureTextEntry={!showPassword} 
         />
         <TouchableOpacity
           style={styles.showButton}
-          onPress={() => setShowPassword(!showPassword)}>
+          onPress={() => setShowPassword(!showPassword)}
+        >
           <Text style={styles.showButtonText}>
             {showPassword ? 'Hide' : 'Show'}
           </Text>
         </TouchableOpacity>
       </View>
-
+  
       <Modal
         visible={modalVisible}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setModalVisible(false)}>
+        onRequestClose={() => setModalVisible(false)}
+      >
         <View style={styles.modalContainer}>
           <FlatList
             data={countries}
-            keyExtractor={item => item.code}
-            renderItem={({item}) => (
+            keyExtractor={(item) => item.code}
+            renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.modalItem}
                 onPress={() => {
                   setSelectedCountry(item);
                   setModalVisible(false);
-                }}>
+                }}
+              >
                 <Text style={styles.modalText}>
                   {item.name} ({item.code})
                 </Text>
@@ -146,15 +152,52 @@ const SignIn: React.FC = () => {
       </Modal>
     </View>
   );
-};
+}  
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 10,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#ffffff',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center', 
+    backgroundColor: '#fff',
+    width: '80%',
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    marginBottom: 20, 
+  },
+  phoneInput: {
+    flex: 1, 
+    fontSize: 16,
+    padding: 10,
+    color: '#333',
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+    padding: 10,
+    color: '#333',
+  },
+  countrySelector: {
+    marginRight: 10, 
+  },
+  countryText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  showButton: {
+    padding: 10,
+  },
+  showButtonText: {
+    fontSize: 14,
+    color: '#007bff',
+    fontWeight: 'bold',
   },
   signInLink: {
     position: 'absolute',
@@ -163,55 +206,7 @@ const styles = StyleSheet.create({
   },
   signInText: {
     fontSize: 16,
-    color: 'light-grey',
-    fontWeight: 'bold',
-  },
-  logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 30,
-  },
-  phoneContainer: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 10,
-    width: '100%',
-  },
-  countrySelector: {
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-  },
-  countryText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  phoneInput: {
-    flex: 1,
-    fontSize: 16,
-    marginLeft: 10,
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 10,
-    width: '100%',
-    marginTop: 20,
-  },
-  passwordInput: {
-    flex: 1,
-    fontSize: 16,
-  },
-  showButton: {
-    paddingHorizontal: 10,
-    justifyContent: 'center',
-  },
-  showButtonText: {
-    fontSize: 16,
-    color: '#3498db',
+    color: 'black',
     fontWeight: 'bold',
   },
   modalContainer: {
@@ -225,11 +220,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   modalItem: {
-    paddingVertical: 15,
+    padding: 15,
   },
   modalText: {
     fontSize: 16,
     color: '#333',
+  },
+  logo: {
+    width: 150,
+    height: 150,
+  //  resizeMode: 'contain',
+    marginBottom: 100,
   },
 });
 
