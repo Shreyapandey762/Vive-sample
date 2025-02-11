@@ -73,8 +73,9 @@ const LandingScreen: React.FC = () => {
         )}
       />
 
-      <Modal visible={modalVisible} animationType="slide" onRequestClose={() => setModalVisible(false)}>
+      <Modal visible={modalVisible}  animationType='fade' transparent={true}  onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
+        <View style={styles.modalBox}>
           <Text style={styles.modalHeader}>New Transaction</Text>
           <TextInput
             placeholder="Enter Transaction Title"
@@ -90,6 +91,7 @@ const LandingScreen: React.FC = () => {
               <Text style={styles.buttonText}>Create</Text>
             </TouchableOpacity>
           </View>
+        </View>
         </View>
       </Modal>
     </View>
@@ -172,7 +174,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+   // backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalBox: {
+    width: '80%',
+    height: '40%',
     backgroundColor: '#ffffff',
+    padding: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5, 
   },
   modalHeader: {
     fontSize: 20,
