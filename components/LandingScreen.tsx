@@ -16,6 +16,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../App';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
+import Vive from '../assets/Vive';
 
 type LandingScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -27,7 +28,6 @@ const LandingScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [transactionTitle, setTransactionTitle] = useState('');
 
-  // Get transactions from Redux
   const transactions = useSelector((state: RootState) => state.transactions.transactions);
 
   const handleCreate = () => {
@@ -47,6 +47,7 @@ const LandingScreen: React.FC = () => {
         onPress={() => navigation.navigate('UserProfile')}>
         <Icon name="user-circle" size={30} color="black" />
       </TouchableOpacity>
+      <Vive color="black" scale={0.4} style={styles.logo} />
 
       <Text style={styles.header}>Good Evening!</Text>
 
@@ -61,6 +62,7 @@ const LandingScreen: React.FC = () => {
 
       <FlatList
         data={transactions}
+        horizontal
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <View style={styles.transactionItem}>
@@ -151,16 +153,12 @@ const styles = StyleSheet.create({
   transactionItem: {
     marginBottom: 10,
     alignItems: 'center',
-    maxWidth: '90%',
-    overflow: 'hidden',
+    maxWidth: '100%',
     backgroundColor: '#ffffff',
-    padding: 10,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    padding: 20,
+    elevation: 1,
+    margin: 5,
+    height: '30%'
   },
   image: {
     width: 100,
