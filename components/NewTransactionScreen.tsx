@@ -30,7 +30,10 @@ interface NewTransactionScreenProps {
   navigation: NewTransactionScreenNavigationProp;
 }
 
-const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({route, navigation}) => {
+const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
+  route,
+  navigation,
+}) => {
   const {transaction} = route.params;
   const dispatch = useDispatch();
 
@@ -86,6 +89,18 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({route, navig
         <Text style={styles.saveButtonText}>Save Transaction</Text>
       </TouchableOpacity>
       <Text style={styles.listingheader}>ACTIVITIES</Text>
+      <View style={styles.horizontalAlign}>
+        <TouchableOpacity onPress={() => navigation.navigate('ListingPlan')}>
+          <View style={styles.card}>
+            <Text style={styles.cardText}>Listing Plan</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('HomePrep')}>
+          <View style={styles.card}>
+            <Text style={styles.cardText}>Home Prep</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -97,6 +112,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     backgroundColor: '#f5f5f5',
+  },
+  card: {
+    marginBottom: 10,
+    alignItems: 'center',
+    minWidth: '50%',
+    maxWidth: '100%',
+    backgroundColor: '#ffffff',
+    padding: 20,
+    elevation: 1,
+    margin: 10,
+    height: '50%',
+    display: 'flex',
+    flexDirection: 'column-reverse',
   },
   cameraButton: {
     justifyContent: 'center',
@@ -110,29 +138,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: 'heavy',
+    fontFamily: 'Comin Sans MS',
     color: '#333',
     marginTop: 20,
-    textAlign: 'left',
+    alignSelf: 'center',
   },
   listingheader: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginTop: 50,
-    textAlign: 'left',
+    margin: 20,
+    marginLeft: 0,
+    alignSelf: 'flex-start',
   },
   title: {
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 6,
     borderBottomWidth: 1,
-    width: '80%',
+    width: '100%',
   },
   textInput: {
     borderBottomWidth: 1,
-    width: '80%',
-    marginVertical: 10,
+    width: '100%',
+    marginVertical: 6,
     padding: 5,
     fontSize: 16,
   },
@@ -150,6 +180,15 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: 'white',
     fontSize: 16,
+  },
+  horizontalAlign: {
+    display: 'flex',
+    flexDirection: 'row',
+    flex: 1,
+  },
+  cardText: {
+    alignSelf: 'flex-start',
+    fontWeight: 'bold',
   },
 });
 
