@@ -17,7 +17,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../App';
 import {useDispatch} from 'react-redux';
-import {addTransaction} from '../store/transactionsSlice';
+import {addTransaction, updateTransaction} from '../store/transactionsSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 type NewTransactionScreenNavigationProp = StackNavigationProp<
@@ -53,7 +53,17 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
 
   const handleSaveTransaction = () => {
     if (subtitle && image) {
-      dispatch(addTransaction({...transaction, subtitle, image}));
+      console.log(transaction.id);
+      if (transaction.id) {
+        console.log('update', subtitle);
+        dispatch(updateTransaction({...transaction, subtitle, image}));
+      } else {
+        console.log('add');
+        dispatch(
+          addTransaction({...transaction, subtitle, image, id: Date.now()}),
+        );
+      }
+
       navigation.navigate('LandingScreen');
       Alert.alert('Success', 'Transaction saved!');
     } else {

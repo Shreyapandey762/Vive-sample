@@ -14,11 +14,11 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
-import { RootStackParamList} from '../App';
+import {RootStackParamList} from '../App';
 import {useSelector} from 'react-redux';
 import {RootState} from '../store';
 import Vive from '../assets/Vive';
-import { Transaction } from '../store/transactionsSlice';
+import {Transaction} from '../store/transactionsSlice';
 
 type LandingScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -36,7 +36,9 @@ const LandingScreen: React.FC = () => {
 
   const handleCreate = () => {
     if (transactionTitle) {
-      navigation.navigate('NewTransactionScreen', {transaction: {id: Date.now(),title: transactionTitle} as Transaction});
+      navigation.navigate('NewTransactionScreen', {
+        transaction: {title: transactionTitle} as Transaction,
+      });
       setModalVisible(false);
       setTransactionTitle('');
     } else {
@@ -71,7 +73,10 @@ const LandingScreen: React.FC = () => {
         horizontal
         keyExtractor={(_, index) => index.toString()}
         renderItem={({item}) => (
-          <TouchableOpacity onPress={() =>navigation.navigate('NewTransactionScreen', {transaction: item})}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('NewTransactionScreen', {transaction: item})
+            }>
             <View style={styles.transactionItem}>
               <Image source={{uri: item.image!}} style={styles.image} />
               <Text>{item.title}</Text>
