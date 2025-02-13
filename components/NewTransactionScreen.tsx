@@ -17,7 +17,11 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../App';
 import {useDispatch} from 'react-redux';
-import {addTransaction, updateTransaction} from '../store/transactionsSlice';
+import {
+  addTransaction,
+  deleteTransaction,
+  updateTransaction,
+} from '../store/transactionsSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 type NewTransactionScreenNavigationProp = StackNavigationProp<
@@ -50,15 +54,19 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
       setImage(result.assets[0].uri || null);
     }
   };
+  const handleDeleteTransaction = () => {
+    if (transaction.id) {
+      dispatch(deleteTransaction(transaction.id));
+      navigation.navigate('LandingScreen');
+      Alert.alert('Deleted', 'Transaction has been removed.');
+    }
+  };
 
   const handleSaveTransaction = () => {
     if (subtitle && image) {
-      console.log(transaction.id);
       if (transaction.id) {
-        console.log('update', subtitle);
         dispatch(updateTransaction({...transaction, subtitle, image}));
       } else {
-        console.log('add');
         dispatch(
           addTransaction({...transaction, subtitle, image, id: Date.now()}),
         );
@@ -73,6 +81,12 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.backButton}>
+        <Icon name="arrow-left" size={24} color="black" />
+      </TouchableOpacity>
+
       <Text style={styles.header}>Selling Transaction</Text>
 
       <TouchableOpacity onPress={handleImagePick} style={styles.cameraButton}>
@@ -97,6 +111,12 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
         onPress={handleSaveTransaction}
         disabled={!subtitle}>
         <Text style={styles.saveButtonText}>Save Transaction</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={handleDeleteTransaction}
+        disabled={!transaction.id}>
+        <Text style={styles.deleteButtonText}>Delete Transaction</Text>
       </TouchableOpacity>
       <Text style={styles.listingheader}>ACTIVITIES</Text>
       <View style={styles.horizontalAlign}>
@@ -123,6 +143,13 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f5f5f5',
   },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    padding: 10,
+  },
+
   card: {
     marginBottom: 10,
     alignItems: 'center',
@@ -199,6 +226,17 @@ const styles = StyleSheet.create({
   cardText: {
     alignSelf: 'flex-start',
     fontWeight: 'bold',
+  },
+  deleteButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop: 10,
+    backgroundColor: 'red',
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
 
