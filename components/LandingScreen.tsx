@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -15,10 +15,12 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../App';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../store';
 import Vive from '../assets/Vive';
 import {Transaction} from '../store/transactionsSlice';
+import {useUser} from '../context/UserContext';
+import {fetchAllTransactions} from '../utils/api';
 
 type LandingScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -29,10 +31,18 @@ const LandingScreen: React.FC = () => {
   const navigation = useNavigation<LandingScreenNavigationProp>();
   const [modalVisible, setModalVisible] = useState(false);
   const [transactionTitle, setTransactionTitle] = useState('');
+  const {user} = useUser();
 
   const transactions = useSelector(
     (state: RootState) => state.transactions.transactions,
   );
+  const dispatch = useDispatch();
+  useEffect(() => {
+    (async () => {
+      const data = await fetchAllTransactions(user!);
+      console.log(data);
+    })();
+  }, []);
 
   const handleCreate = () => {
     if (transactionTitle) {

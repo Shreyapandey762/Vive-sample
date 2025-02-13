@@ -12,9 +12,10 @@ import {
 } from 'react-native';
 import Vive from '../assets/Vive';
 import axios from 'axios';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../App';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {useNavigation} from '@react-navigation/native';
+import {RootStackParamList} from '../App';
+import {useUser} from '../context/UserContext';
 
 const countries = [
   {code: '+1', name: 'USA'},
@@ -29,6 +30,7 @@ const SignIn: React.FC = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const {setUser} = useUser();
 
   const handleSignIn = async () => {
     if (phoneNumber.length < 9 || phoneNumber.length > 13) {
@@ -63,35 +65,39 @@ const SignIn: React.FC = () => {
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },
-        }
+        },
       );
 
       console.log('Response Data:', response.data);
+      setUser(response.data.user);
       navigation.navigate('LandingScreen');
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        Alert.alert('Sign-In Failed', error.response?.data?.message || 'An error occurred');
+        Alert.alert(
+          'Sign-In Failed',
+          error.response?.data?.message || 'An error occurred',
+        );
         console.error('Axios Error:', error.response?.data || error.message);
       } else {
-        Alert.alert('Unexpected Error', 'Something went wrong. Please try again.');
+        Alert.alert(
+          'Unexpected Error',
+          'Something went wrong. Please try again.',
+        );
         console.error('Unexpected Error:', error);
       }
     }
   };
-
 
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.signInLink} onPress={handleSignIn}>
         <Text style={styles.signInText}>Sign In</Text>
       </TouchableOpacity>
-  
       <Vive color="black" scale={0.3} style={styles.logo} />
       <View style={styles.inputContainer}>
         <TouchableOpacity
           style={styles.countrySelector}
-          onPress={() => setModalVisible(true)}
-        >
+          onPress={() => setModalVisible(true)}>
           <Text style={styles.countryText}>{selectedCountry.code}</Text>
         </TouchableOpacity>
         <TextInput
@@ -103,8 +109,7 @@ const SignIn: React.FC = () => {
           keyboardType="phone-pad"
         />
       </View>
-  
-     \
+      \
       <View style={styles.inputContainer}>
         <TextInput
           placeholder="Password"
@@ -112,36 +117,32 @@ const SignIn: React.FC = () => {
           onChangeText={setPassword}
           placeholderTextColor="grey"
           style={styles.passwordInput}
-          secureTextEntry={!showPassword} 
+          secureTextEntry={!showPassword}
         />
         <TouchableOpacity
           style={styles.showButton}
-          onPress={() => setShowPassword(!showPassword)}
-        >
+          onPress={() => setShowPassword(!showPassword)}>
           <Text style={styles.showButtonText}>
             {showPassword ? 'Hide' : 'Show'}
           </Text>
         </TouchableOpacity>
       </View>
-  
       <Modal
         visible={modalVisible}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
+        onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <FlatList
             data={countries}
-            keyExtractor={(item) => item.code}
-            renderItem={({ item }) => (
+            keyExtractor={item => item.code}
+            renderItem={({item}) => (
               <TouchableOpacity
                 style={styles.modalItem}
                 onPress={() => {
                   setSelectedCountry(item);
                   setModalVisible(false);
-                }}
-              >
+                }}>
                 <Text style={styles.modalText}>
                   {item.name} ({item.code})
                 </Text>
@@ -152,7 +153,7 @@ const SignIn: React.FC = () => {
       </Modal>
     </View>
   );
-}  
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -164,15 +165,15 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    alignItems: 'center', 
+    alignItems: 'center',
     backgroundColor: '#fff',
     width: '80%',
     paddingHorizontal: 10,
     borderBottomWidth: 1,
-    marginBottom: 20, 
+    marginBottom: 20,
   },
   phoneInput: {
-    flex: 1, 
+    flex: 1,
     fontSize: 16,
     padding: 10,
     color: '#333',
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   countrySelector: {
-    marginRight: 10, 
+    marginRight: 10,
   },
   countryText: {
     fontSize: 16,
@@ -229,7 +230,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 150,
     height: 150,
-  //  resizeMode: 'contain',
+    //  resizeMode: 'contain',
     marginBottom: 100,
   },
 });
