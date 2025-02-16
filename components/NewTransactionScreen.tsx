@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   Image,
   StyleSheet,
   TouchableOpacity,
@@ -17,11 +16,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../App';
 import {useDispatch} from 'react-redux';
-import {
-  addTransaction,
-  deleteTransaction,
-  Transaction,
-} from '../store/transactionsSlice';
+import {deleteTransaction, Transaction} from '../store/transactionsSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {updateTransaction} from '../utils/api';
 import {useUser} from '../context/UserContext';
@@ -70,19 +65,12 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
   };
 
   const handleSaveTransaction = async () => {
-    if (transaction1.full_address) {
-      if (transaction1.id) {
-        console.log(transaction1);
-        await updateTransaction(user!, transaction1.id.$oid, transaction1);
-      } else {
-        dispatch(addTransaction(transaction1));
-      }
-
-      navigation.navigate('LandingScreen');
-      Alert.alert('Success', 'Transaction saved!');
-    } else {
-      Alert.alert('Error', 'Please provide subtitle and image.');
+    if (transaction1.id) {
+      console.log(transaction1);
+      await updateTransaction(user!, transaction1.id.$oid, transaction1);
     }
+    navigation.navigate('LandingScreen');
+    Alert.alert('Success', 'Transaction saved!');
   };
 
   return (
@@ -128,14 +116,10 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
         style={[
           styles.saveButton,
           {
-            backgroundColor:
-              transaction1.full_address && transaction1.image_url
-                ? '#007bff'
-                : '#c0c0c0',
+            backgroundColor: '#007bff',
           },
         ]}
-        onPress={handleSaveTransaction}
-        disabled={!transaction1.full_address}>
+        onPress={handleSaveTransaction}>
         <Text style={styles.saveButtonText}>Save Transaction</Text>
       </TouchableOpacity>
       <TouchableOpacity

@@ -1,7 +1,5 @@
-import axios from 'axios';
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {User} from '../context/UserContext';
-import {Dispatch} from 'redux';
 
 const BASE_URL = 'https://staging.gotvive.com/api/v1';
 

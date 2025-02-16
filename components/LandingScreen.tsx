@@ -9,7 +9,6 @@ import {
   Alert,
   FlatList,
   Image,
-  Button,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {useNavigation} from '@react-navigation/native';
@@ -18,7 +17,7 @@ import {RootStackParamList} from '../App';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../store';
 import Vive from '../assets/Vive';
-import {setTransactions, Transaction} from '../store/transactionsSlice';
+import {setTransactions} from '../store/transactionsSlice';
 import {useUser} from '../context/UserContext';
 import {createTransaction, fetchAllTransactions} from '../utils/api';
 
@@ -89,7 +88,6 @@ const LandingScreen: React.FC = () => {
             <View style={styles.transactionItem}>
               <Image source={{uri: item.image_url!}} style={styles.image} />
               <Text>{item.name}</Text>
-              {/* <Text>{item.full_address}</Text> */}
             </View>
           </TouchableOpacity>
         )}
