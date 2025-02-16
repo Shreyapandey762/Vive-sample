@@ -18,7 +18,7 @@ import {RootStackParamList} from '../App';
 import {useDispatch, useSelector} from 'react-redux';
 import {RootState} from '../store';
 import Vive from '../assets/Vive';
-import {Transaction} from '../store/transactionsSlice';
+import {setTransactions, Transaction} from '../store/transactionsSlice';
 import {useUser} from '../context/UserContext';
 import {fetchAllTransactions} from '../utils/api';
 
@@ -30,27 +30,28 @@ type LandingScreenNavigationProp = StackNavigationProp<
 const LandingScreen: React.FC = () => {
   const navigation = useNavigation<LandingScreenNavigationProp>();
   const [modalVisible, setModalVisible] = useState(false);
-  const [transactionTitle, setTransactionTitle] = useState('');
+  const [name, setName] = useState('');
   const {user} = useUser();
+  const dispatch = useDispatch();
 
   const transactions = useSelector(
     (state: RootState) => state.transactions.transactions,
   );
-  const dispatch = useDispatch();
   useEffect(() => {
     (async () => {
       const data = await fetchAllTransactions(user!);
       console.log(data);
+      dispatch(setTransactions(data));
     })();
   }, []);
 
   const handleCreate = () => {
-    if (transactionTitle) {
+    if (name) {
       navigation.navigate('NewTransactionScreen', {
-        transaction: {title: transactionTitle} as Transaction,
+        transaction: {name} as Transaction,
       });
       setModalVisible(false);
-      setTransactionTitle('');
+      setName('');
     } else {
       Alert.alert('Error', 'Please enter a transaction title.');
     }
@@ -88,9 +89,9 @@ const LandingScreen: React.FC = () => {
               navigation.navigate('NewTransactionScreen', {transaction: item})
             }>
             <View style={styles.transactionItem}>
-              <Image source={{uri: item.image!}} style={styles.image} />
-              <Text>{item.title}</Text>
-              <Text>{item.subtitle}</Text>
+              <Image source={{uri: item.image_url!}} style={styles.image} />
+              <Text>{item.name}</Text>
+              {/* <Text>{item.full_address}</Text> */}
             </View>
           </TouchableOpacity>
         )}
@@ -107,8 +108,8 @@ const LandingScreen: React.FC = () => {
             <TextInput
               placeholder="The Michelle's Home"
               placeholderTextColor={'grey'}
-              value={transactionTitle}
-              onChangeText={setTransactionTitle}
+              value={name}
+              onChangeText={setName}
               style={styles.textInput}
             />
             <View style={styles.buttonsContainer}>
@@ -120,11 +121,11 @@ const LandingScreen: React.FC = () => {
               <TouchableOpacity
                 style={styles.button}
                 onPress={handleCreate}
-                disabled={transactionTitle.length == 0}>
+                disabled={name.length == 0}>
                 <Text
                   style={{
                     ...styles.buttonText,
-                    color: transactionTitle.length === 0 ? 'grey' : 'blue',
+                    color: name.length === 0 ? 'grey' : 'blue',
                   }}>
                   Create
                 </Text>

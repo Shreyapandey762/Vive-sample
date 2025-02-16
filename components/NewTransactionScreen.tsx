@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -16,13 +16,21 @@ import {
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../App';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   addTransaction,
   deleteTransaction,
-  updateTransaction,
+  setTransactions,
+  Transaction,
 } from '../store/transactionsSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {RootState} from '../store';
+import {
+  fetchAllTransactions,
+  fetchTransactionDetails,
+  updateTransaction,
+} from '../utils/api';
+import {useUser} from '../context/UserContext';
 
 type NewTransactionScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -38,11 +46,16 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
   route,
   navigation,
 }) => {
-  const {transaction} = route.params;
   const dispatch = useDispatch();
+  const {user} = useUser();
 
-  const [subtitle, setSubtitle] = useState<string>(transaction.subtitle ?? '');
-  const [image, setImage] = useState<string | null>(transaction.image ?? '');
+  const [transaction1, setTransaction1] = useState<Transaction>(
+    route.params.transaction,
+  );
+
+  useEffect(() => {
+    setTransaction1(route.params.transaction);
+  }, [route.params.transaction]);
 
   const handleImagePick = async () => {
     const result: ImagePickerResponse = await launchImageLibrary({
@@ -51,25 +64,24 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
     });
 
     if (result.assets && result.assets.length > 0) {
-      setImage(result.assets[0].uri || null);
+      setTransaction1(prev => ({...prev, image_url: result.assets![0].uri!}));
     }
   };
   const handleDeleteTransaction = () => {
-    if (transaction.id) {
-      dispatch(deleteTransaction(transaction.id));
+    if (transaction1.id) {
+      dispatch(deleteTransaction(transaction1.id));
       navigation.navigate('LandingScreen');
       Alert.alert('Deleted', 'Transaction has been removed.');
     }
   };
 
-  const handleSaveTransaction = () => {
-    if (subtitle && image) {
-      if (transaction.id) {
-        dispatch(updateTransaction({...transaction, subtitle, image}));
+  const handleSaveTransaction = async () => {
+    if (transaction1.full_address) {
+      if (transaction1.id) {
+        console.log(transaction1);
+        await updateTransaction(user!, transaction1.id.$oid, transaction1);
       } else {
-        dispatch(
-          addTransaction({...transaction, subtitle, image, id: Date.now()}),
-        );
+        dispatch(addTransaction(transaction1));
       }
 
       navigation.navigate('LandingScreen');
@@ -94,28 +106,48 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
           <Icon name="camera" size={50} color="black" />
         </View>
       </TouchableOpacity>
-      <Text style={styles.title}>{transaction.title}</Text>
+      <TextInput
+        style={styles.title}
+        onChangeText={(text: string) => {
+          // console.log(text);
+          setTransaction1(prev => ({...prev, name: text}));
+        }}>
+        {transaction1.name}
+      </TextInput>
       <TextInput
         placeholder="Address of the house"
-        value={subtitle}
-        onChangeText={setSubtitle}
+        value={transaction1.full_address!}
+        // onChangeText={setFullAddress}
+        onChangeText={(text: string) =>
+          setTransaction1(prev => ({...prev, full_address: text}))
+        }
         placeholderTextColor="grey"
         style={styles.textInput}
       />
-      {image && <Image source={{uri: image}} style={styles.imagePreview} />}
+      {transaction1.image_url && (
+        <Image
+          source={{uri: transaction1.image_url}}
+          style={styles.imagePreview}
+        />
+      )}
       <TouchableOpacity
         style={[
           styles.saveButton,
-          {backgroundColor: subtitle && image ? '#007bff' : '#c0c0c0'},
+          {
+            backgroundColor:
+              transaction1.full_address && transaction1.image_url
+                ? '#007bff'
+                : '#c0c0c0',
+          },
         ]}
         onPress={handleSaveTransaction}
-        disabled={!subtitle}>
+        disabled={!transaction1.full_address}>
         <Text style={styles.saveButtonText}>Save Transaction</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.deleteButton}
         onPress={handleDeleteTransaction}
-        disabled={!transaction.id}>
+        disabled={!transaction1.id}>
         <Text style={styles.deleteButtonText}>Delete Transaction</Text>
       </TouchableOpacity>
       <Text style={styles.listingheader}>ACTIVITIES</Text>
