@@ -20,7 +20,7 @@ import {RootState} from '../store';
 import Vive from '../assets/Vive';
 import {setTransactions, Transaction} from '../store/transactionsSlice';
 import {useUser} from '../context/UserContext';
-import {fetchAllTransactions} from '../utils/api';
+import {createTransaction, fetchAllTransactions} from '../utils/api';
 
 type LandingScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -43,13 +43,11 @@ const LandingScreen: React.FC = () => {
       console.log(data);
       dispatch(setTransactions(data));
     })();
-  }, []);
+  }, [modalVisible]);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (name) {
-      navigation.navigate('NewTransactionScreen', {
-        transaction: {name} as Transaction,
-      });
+      await createTransaction(user!, name);
       setModalVisible(false);
       setName('');
     } else {

@@ -16,20 +16,14 @@ import {
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../App';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {
   addTransaction,
   deleteTransaction,
-  setTransactions,
   Transaction,
 } from '../store/transactionsSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {RootState} from '../store';
-import {
-  fetchAllTransactions,
-  fetchTransactionDetails,
-  updateTransaction,
-} from '../utils/api';
+import {updateTransaction} from '../utils/api';
 import {useUser} from '../context/UserContext';
 
 type NewTransactionScreenNavigationProp = StackNavigationProp<
