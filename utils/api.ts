@@ -64,3 +64,27 @@ export const updateTransaction = async (
     console.error(e);
   }
 };
+
+export const deleteTransaction = async (
+  user: User,
+  transaction_id: string | null,
+) => {
+  try {
+    const headers = {
+      Authorization: `Bearer ${user.auth_token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    console.log(headers);
+    const res = await fetch(
+      `${BASE_URL}/transactions/${transaction_id}/remove_transaction`,
+      {
+        method: 'POST',
+        headers: headers,
+      },
+    );
+    console.log(res);
+  } catch (e) {
+    console.error(e);
+  }
+};

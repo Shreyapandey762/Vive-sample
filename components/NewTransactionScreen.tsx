@@ -16,9 +16,9 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp} from '@react-navigation/native';
 import {RootStackParamList} from '../App';
 import {useDispatch} from 'react-redux';
-import {deleteTransaction, Transaction} from '../store/transactionsSlice';
+import {Transaction} from '../store/transactionsSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {updateTransaction} from '../utils/api';
+import {deleteTransaction, updateTransaction} from '../utils/api';
 import {useUser} from '../context/UserContext';
 
 type NewTransactionScreenNavigationProp = StackNavigationProp<
@@ -35,7 +35,6 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
   route,
   navigation,
 }) => {
-  const dispatch = useDispatch();
   const {user} = useUser();
 
   const [transaction1, setTransaction1] = useState<Transaction>(
@@ -56,12 +55,12 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
       setTransaction1(prev => ({...prev, image_url: result.assets![0].uri!}));
     }
   };
-  const handleDeleteTransaction = () => {
+  const handleDeleteTransaction = async () => {
     if (transaction1.id) {
-      dispatch(deleteTransaction(transaction1.id));
-      navigation.navigate('LandingScreen');
-      Alert.alert('Deleted', 'Transaction has been removed.');
+      await deleteTransaction(user!, transaction1.id.$oid);
     }
+    navigation.navigate('LandingScreen');
+    Alert.alert('Success', 'Transaction deleted!');
   };
 
   const handleSaveTransaction = async () => {
