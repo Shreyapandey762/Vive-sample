@@ -20,7 +20,7 @@ export type RootStackParamList = {
   SignIn: undefined;
   UserProfile: undefined;
   ListingPlan: undefined;
-  HomePrep: undefined;
+  HomePrep: {transaction: Transaction};
 };
 
 const Stack = createStackNavigator<RootStackParamList>();

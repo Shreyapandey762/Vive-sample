@@ -134,7 +134,10 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
             <Text style={styles.cardText}>Listing Plan</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('HomePrep')}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('HomePrep', {transaction: transaction1})
+          }>
           <View style={styles.card}>
             <Text style={styles.cardText}>Home Prep</Text>
           </View>

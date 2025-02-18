@@ -39,7 +39,6 @@ const LandingScreen: React.FC = () => {
   useEffect(() => {
     (async () => {
       const data = await fetchAllTransactions(user!);
-      console.log(data);
       dispatch(setTransactions(data));
     })();
   }, [modalVisible]);

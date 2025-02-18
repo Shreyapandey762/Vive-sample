@@ -39,14 +39,23 @@ export type Transaction = {
   homeprep_task_images?: string[];
 };
 
+export type Task = {
+  id: {$oid: string};
+  work_tag: {name: string};
+  status: string;
+  images: {image_thumb_url: string}[];
+};
+
 interface TransactionsState {
   transactions: Transaction[];
   transactionDetails: Transaction | null;
+  tasks: Task[];
 }
 
 const initialState: TransactionsState = {
   transactions: [],
   transactionDetails: null,
+  tasks: [],
 };
 
 const transactionsSlice = createSlice({
@@ -57,29 +66,33 @@ const transactionsSlice = createSlice({
       state.transactions = action.payload;
     },
 
-    addTransaction: (state, action: PayloadAction<Transaction>) => {
-      state.transactions.push(action.payload);
-    },
-    updateTransaction: (state, action: PayloadAction<Transaction>) => {
-      state.transactions = state.transactions.map(e =>
-        e.id === action.payload.id ? action.payload : e,
-      );
-    },
-    deleteTransaction: (state, action: PayloadAction<number>) => {
-      state.transactions = state.transactions.filter(
-        e => e.id !== action.payload,
-      );
-    },
-    setTransactionDetails: (state, action: PayloadAction<Transaction>) => {
-      state.transactionDetails = action.payload;
+    // addTransaction: (state, action: PayloadAction<Transaction>) => {
+    //   state.transactions.push(action.payload);
+    // },
+    // updateTransaction: (state, action: PayloadAction<Transaction>) => {
+    //   state.transactions = state.transactions.map(e =>
+    //     e.id === action.payload.id ? action.payload : e,
+    //   );
+    // },
+    // deleteTransaction: (state, action: PayloadAction<Transaction>) => {
+    //   state.transactions = state.transactions.filter(
+    //     e => e.id !== action.payload,
+    //   );
+    // },
+    // setTransactionDetails: (state, action: PayloadAction<Transaction>) => {
+    //   state.transactionDetails = action.payload;
+    // },
+    setAllTasks: (state, action: PayloadAction<Task[]>) => {
+      state.tasks = action.payload;
     },
   },
 });
 
 export const {
   setTransactions,
-  addTransaction,
-  updateTransaction,
-  deleteTransaction,
+  // addTransaction,
+  // updateTransaction,
+  // deleteTransaction,
+  setAllTasks,
 } = transactionsSlice.actions;
 export default transactionsSlice.reducer;

@@ -88,3 +88,27 @@ export const deleteTransaction = async (
     console.error(e);
   }
 };
+
+export const sampleFunction = async (
+  user: User,
+  transaction_id: string | null,
+) => {
+  try {
+    const headers = {
+      Authorization: `Bearer ${user.auth_token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    const res = await fetch(
+      `https://staging.gotvive.com/api/v2/homeprep_tasks?transaction_id=${transaction_id}`,
+      {
+        method: 'GET',
+        headers: headers,
+      },
+    );
+    const jsonData = await res.json();
+    return jsonData;
+  } catch (e) {
+    console.log(e);
+  }
+};
