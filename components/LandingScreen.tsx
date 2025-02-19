@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -9,39 +9,36 @@ import {
   Alert,
   FlatList,
   Image,
+  Button,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../App';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RootStackParamList} from '../App';
+import {useSelector} from 'react-redux';
+import {RootState} from '../store';
 import Vive from '../assets/Vive';
+import {Transaction} from '../store/transactionsSlice';
 
 type LandingScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   'LandingScreen'
 >;
-type LandingScreenRouteProp = RouteProp<RootStackParamList, 'LandingScreen'>;
 
 const LandingScreen: React.FC = () => {
   const navigation = useNavigation<LandingScreenNavigationProp>();
-  const route = useRoute<LandingScreenRouteProp>();
   const [modalVisible, setModalVisible] = useState(false);
   const [transactionTitle, setTransactionTitle] = useState('');
-  const [transactions, setTransactions] = useState<any[]>([]);
 
-  useEffect(() => {
-    if (route.params?.newTransaction) {
-      setTransactions((prevTransactions) => [
-        ...prevTransactions,
-        route.params?.newTransaction,
-      ]);
-      navigation.setParams({ newTransaction: undefined });
-    }
-  }, [route.params?.newTransaction, navigation]);
+  const transactions = useSelector(
+    (state: RootState) => state.transactions.transactions,
+  );
 
   const handleCreate = () => {
     if (transactionTitle) {
-      navigation.navigate('NewTransactionScreen', { title: transactionTitle });
+      navigation.navigate('NewTransactionScreen', {
+        transaction: {title: transactionTitle} as Transaction,
+      });
       setModalVisible(false);
       setTransactionTitle('');
     } else {
@@ -51,19 +48,17 @@ const LandingScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Profile Icon */}
       <TouchableOpacity
         style={styles.profileIcon}
         onPress={() => navigation.navigate('UserProfile')}>
         <Icon name="user-circle" size={30} color="black" />
       </TouchableOpacity>
+      <Vive color="black" scale={0.2} style={styles.logo} />
 
-      <Vive color="black" scale={0.3} style={styles.logo} />
       <Text style={styles.header}>Good Evening!</Text>
 
       <View style={styles.transactionContainer}>
         <Text style={styles.transactionText}>Selling</Text>
-
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
           style={styles.addButton}>
@@ -75,44 +70,62 @@ const LandingScreen: React.FC = () => {
 
       <FlatList
         data={transactions}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.transactionItem}>
-            <Image source={{ uri: item.image }} style={styles.image} />
-            <Text>{item.title}</Text>
-            <Text>{item.subtitle}</Text>
-          </View>
+        horizontal
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({item}) => (
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('NewTransactionScreen', {transaction: item})
+            }>
+            <View style={styles.transactionItem}>
+              <Image source={{uri: item.image!}} style={styles.image} />
+              <Text>{item.title}</Text>
+              <Text>{item.subtitle}</Text>
+            </View>
+          </TouchableOpacity>
         )}
       />
 
       <Modal
         visible={modalVisible}
-        animationType="slide"
+        animationType="fade"
+        transparent={true}
         onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
-          <Text style={styles.modalHeader}>New Transaction</Text>
-          <TextInput
-            placeholder="Enter Transaction Title"
-            value={transactionTitle}
-            onChangeText={setTransactionTitle}
-            style={styles.textInput}
-          />
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => setModalVisible(false)}>
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={handleCreate}>
-              <Text style={styles.buttonText}>Create</Text>
-            </TouchableOpacity>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalHeader}>New Transaction</Text>
+            <TextInput
+              placeholder="The Michelle's Home"
+              placeholderTextColor={'grey'}
+              value={transactionTitle}
+              onChangeText={setTransactionTitle}
+              style={styles.textInput}
+            />
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => setModalVisible(false)}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleCreate}
+                disabled={transactionTitle.length == 0}>
+                <Text
+                  style={{
+                    ...styles.buttonText,
+                    color: transactionTitle.length === 0 ? 'grey' : 'blue',
+                  }}>
+                  Create
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -134,7 +147,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginTop: 20,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   transactionContainer: {
     flexDirection: 'row',
@@ -171,16 +184,12 @@ const styles = StyleSheet.create({
   transactionItem: {
     marginBottom: 10,
     alignItems: 'center',
-    maxWidth: '90%',
-    overflow: 'hidden',
+    maxWidth: '100%',
     backgroundColor: '#ffffff',
-    padding: 10,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    padding: 20,
+    elevation: 1,
+    margin: 5,
+    height: '30%',
   },
   image: {
     width: 100,
@@ -194,13 +203,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    // backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalBox: {
+    width: '90%',
+    height: '25%',
     backgroundColor: '#ffffff',
+    padding: 5,
+
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
   },
   modalHeader: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+    marginBottom: 10,
+    textAlign: 'left',
   },
   textInput: {
     borderBottomWidth: 1,
@@ -212,20 +232,19 @@ const styles = StyleSheet.create({
   },
   buttonsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     width: '80%',
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: 'white',
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   buttonText: {
-    color: '#ffffff',
+    color: 'blue',
     fontSize: 16,
     fontWeight: '600',
   },
