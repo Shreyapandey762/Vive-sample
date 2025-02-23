@@ -98,7 +98,6 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
       <TextInput
         placeholder="Address of the house"
         value={transaction1.full_address!}
-        // onChangeText={setFullAddress}
         onChangeText={(text: string) =>
           setTransaction1(prev => ({...prev, full_address: text}))
         }

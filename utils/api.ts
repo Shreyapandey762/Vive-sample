@@ -112,3 +112,33 @@ export const sampleFunction = async (
     console.log(e);
   }
 };
+
+export const defaultAreaTag = async (
+  user: User,
+  transaction_id: string | null,
+  transaction: Transaction,
+) => {
+  try {
+    const formData = new FormData();
+    formData.append('transaction[name]', transaction.name);
+    formData.append('transaction[image]', {
+      uri: transaction.image_url,
+      name: 'image.png',
+      type: 'image/png',
+    });
+
+    await axios.put(
+      `https://staging.gotvive.com/api/v1/homeprep_tasks?${transaction_id}`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Accept: 'application/json',
+          Authorization: `Bearer ${user.auth_token}`,
+        },
+      },
+    );
+  } catch (e) {
+    console.error(e);
+  }
+};

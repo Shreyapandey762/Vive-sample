@@ -6,17 +6,16 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
-  Task,
+  Animated,
+  TextInput,
+  Dimensions,
 } from 'react-native';
-import {
-  ImagePickerResponse,
-  launchImageLibrary,
-} from 'react-native-image-picker';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {sampleFunction} from '../utils/api';
 import {useUser} from '../context/UserContext';
 import {useDispatch, useSelector} from 'react-redux';
-import {setAllTasks, Transaction} from '../store/transactionsSlice';
+import {setAllTasks} from '../store/transactionsSlice';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../App';
 import {RouteProp} from '@react-navigation/native';
@@ -32,12 +31,14 @@ interface HomePrepProps {
   navigation: HomePrepNavigationProps;
 }
 
+const {width} = Dimensions.get('window');
+const CARD_SIZE = width * 0.5;
+
 const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const {transaction} = route.params || {};
   const {user} = useUser();
   const dispatch = useDispatch();
-  const [modalVisible, setModalVisible] = useState(false);
-  const {transaction} = route.params || {};
+  const slideAnim = useState(new Animated.Value(100))[0];
 
   const tasks = useSelector((state: RootState) => state.transactions.tasks);
 
@@ -50,47 +51,73 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
         console.error('Error calling sampleFunction:', error);
       }
     };
-
     apiCall();
-  }, [transaction, modalVisible]);
+  }, [transaction]);
 
   const handleImagePick = async () => {
-    const result = await launchImageLibrary({mediaType: 'photo', quality: 1});
-
+    const result = await launchCamera({mediaType: 'photo', quality: 1});
     if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
-      setImageUri(result.assets[0].uri);
+      console.log('Image picked:', result.assets[0].uri);
     }
+  };
+
+  const slideIn = () => {
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Home Prep</Text>
-
-      <TouchableOpacity onPress={handleImagePick} style={styles.cameraButton}>
-        <Icon name="camera" size={50} color="black" />
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.backButton}>
+        <Icon name="arrow-left" size={20} color="black" />
       </TouchableOpacity>
 
-      {imageUri && (
-        <Image source={{uri: imageUri}} style={styles.imagePreview} />
-      )}
+      <Text style={styles.header}>Home Prep</Text>
 
-      <Text style={styles.taskHeader}>Tasks</Text>
       <FlatList
         data={tasks}
-        keyExtractor={item => item.id.$oid}
+        keyExtractor={item => item.id?.$oid ?? ''}
+        contentContainerStyle={styles.listContainer}
         renderItem={({item}) => (
-          <View style={styles.taskCard}>
-            <Text style={styles.taskTitle}>{item.work_tag?.name}</Text>
-            <Text>Status: {item.status}</Text>
-            {item.images.length > 0 && (
+          <View style={styles.taskWrapper}>
+            <View style={styles.taskCard}>
+              <Text style={styles.taskTitle}>{item.work_tag?.name}</Text>
+              <Text style={styles.taskStatus}>Status: {item.status}</Text>
               <Image
-                source={{uri: item.images[0].image_thumb_url}}
+                source={{
+                  uri:
+                    item?.images!.length > 0
+                      ? item.images![0].image_thumb_url!
+                      : '',
+                }}
                 style={styles.taskImage}
               />
-            )}
+            </View>
           </View>
         )}
       />
+
+      <Animated.View
+        style={[
+          styles.cameraContainer,
+          {transform: [{translateX: slideAnim}]},
+        ]}>
+        <TouchableOpacity onPress={handleImagePick} style={styles.cameraButton}>
+          <Icon name="camera" size={20} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => {}} style={styles.cameraButton}>
+          <Icon name="edit" size={20} color={'black'} />
+        </TouchableOpacity>
+      </Animated.View>
+
+      <TouchableOpacity onPress={slideIn} style={styles.arrowButton}>
+        <Icon name="arrow-left" size={20} color="black" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -101,46 +128,79 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f5f5f5',
   },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    padding: 10,
+  },
   header: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+    textAlign: 'center',
     marginBottom: 20,
   },
-  cameraButton: {
-    alignSelf: 'center',
-    marginBottom: 20,
+  listContainer: {
+    alignItems: 'flex-start',
   },
-  imagePreview: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-  taskHeader: {
-    fontSize: 16,
-    fontWeight: 'bold',
+  taskWrapper: {
+    alignItems: 'flex-start',
     marginBottom: 10,
   },
   taskCard: {
+    width: CARD_SIZE,
+    height: CARD_SIZE,
     backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    padding: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   taskTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  taskStatus: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 5,
   },
   taskImage: {
     width: 60,
     height: 60,
-    marginTop: 10,
+    marginBottom: 5,
+    borderRadius: 5,
+  },
+  noteInput: {
+    width: CARD_SIZE,
+    padding: 6,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    fontSize: 12,
+    marginTop: 5,
+  },
+  cameraContainer: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  cameraButton: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 50,
+    elevation: 5,
+  },
+  arrowButton: {
+    // position: 'absolute',
+    // bottom: 25,
+    // right: 100,
+    // backgroundColor: 'white',
+    // padding: 10,
+    // elevation: 5,
   },
 });
 
