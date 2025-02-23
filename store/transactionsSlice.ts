@@ -42,16 +42,16 @@ export type Transaction = {
 export type HomePrepTask = {
   id?: {$oid: string};
   transaction_id: {$oid: string};
-  work_tag: {name: string};
-  status: string;
+  work_tag?: {name: string};
+  status?: string;
   images?: TaskImage[];
   notes?: string;
 };
 
 export type TaskImage = {
-  id: {$oid: string};
-  image_thumb_url: string | null;
-  image_url: string | null;
+  id?: {$oid: string};
+  image_thumb_url?: string | null;
+  image_url?: string | null;
 };
 
 interface TransactionsState {

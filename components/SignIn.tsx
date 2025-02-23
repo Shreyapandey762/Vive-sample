@@ -25,9 +25,9 @@ const countries = [
 
 const SignIn: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [password, setPassword] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState(countries[1]);
+  const [phoneNumber, setPhoneNumber] = useState('7000335933');
+  const [password, setPassword] = useState('password');
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const {setUser} = useUser();

@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import {sampleFunction} from '../utils/api';
 import {useUser} from '../context/UserContext';
 import {useDispatch, useSelector} from 'react-redux';
-import {setAllTasks} from '../store/transactionsSlice';
+import {HomePrepTask, setAllTasks} from '../store/transactionsSlice';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../App';
 import {RouteProp} from '@react-navigation/native';
@@ -42,6 +42,8 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
 
   const tasks = useSelector((state: RootState) => state.transactions.tasks);
 
+  const [task, setTask] = useState<HomePrepTask>({} as HomePrepTask);
+
   useEffect(() => {
     const apiCall = async () => {
       try {
@@ -58,6 +60,11 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
     const result = await launchCamera({mediaType: 'photo', quality: 1});
     if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
       console.log('Image picked:', result.assets[0].uri);
+      setTask({
+        transaction_id: transaction.id,
+        images: [{image_thumb_url: result.assets![0].uri!}],
+      });
+      navigation.navigate('HomePreptask', {task: task});
     }
   };
 
