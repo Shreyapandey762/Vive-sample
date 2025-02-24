@@ -43,6 +43,7 @@ export type HomePrepTask = {
   id?: {$oid: string};
   transaction_id: {$oid: string};
   work_tag?: {name: string};
+  place_tag?: {name: string};
   status?: string;
   images?: TaskImage[];
   notes?: string;

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {User} from '../context/UserContext';
-import {Transaction} from '../store/transactionsSlice';
+import {HomePrepTask, Transaction} from '../store/transactionsSlice';
 
 const BASE_URL = 'https://staging.gotvive.com/api/v1';
 
@@ -113,22 +113,76 @@ export const sampleFunction = async (
   }
 };
 
-export const defaultAreaTag = async (
+export const getDefaultAreaTag = async (
+  user: User,
+  transaction_id: string | null,
+) => {
+  try {
+    const headers = {
+      Authorization: `Bearer ${user.auth_token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    const res = await fetch(
+      `https://staging.gotvive.com/api/v1/tags/default_areas?transaction_id=${transaction_id}&v2=true`,
+      {
+        method: 'GET',
+        headers: headers,
+      },
+    );
+    const jsonData = await res.json();
+    console.log(jsonData);
+    return jsonData;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const getDefaultWorkTag = async (
+  user: User,
+  transaction_id: string | null,
+) => {
+  try {
+    const headers = {
+      Authorization: `Bearer ${user.auth_token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    const res = await fetch(
+      `https://staging.gotvive.com/api/v1/tags/default_tasks?transaction_id=${transaction_id}&v2=true`,
+      {
+        method: 'GET',
+        headers: headers,
+      },
+    );
+    const jsonData = await res.json();
+    console.log(jsonData);
+    return jsonData;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const createTask = async (
   user: User,
   transaction_id: string | null,
   transaction: Transaction,
+  homeprep_task: HomePrepTask,
 ) => {
   try {
     const formData = new FormData();
-    formData.append('transaction[name]', transaction.name);
-    formData.append('transaction[image]', {
-      uri: transaction.image_url,
-      name: 'image.png',
-      type: 'image/png',
-    });
+    formData.append('homeprep_task[notes]', homeprep_task.notes);
+    formData.append('transaction_id', transaction.id);
+    formData.append('work_tag', homeprep_task.work_tag);
+    formData.append('place_tag', homeprep_task.place_tag);
+    // formData.append('transaction[image]', {
+    //   uri: transaction.image_url,
+    //   name: 'image.png',
+    //   type: 'image/png',
+    // });
 
-    await axios.put(
-      `https://staging.gotvive.com/api/v1/homeprep_tasks?${transaction_id}`,
+    await axios.post(
+      `https://www.staging.gotvive.com/api/v2/homeprep_tasks?transaction_id=${transaction_id}`,
       formData,
       {
         headers: {

@@ -13,6 +13,7 @@ import {HomePrepTask, Transaction} from './store/transactionsSlice';
 import ListingPlan from './components/ListingPlan';
 import HomePrep from './components/HomePrep';
 import HomePreptask from './components/HomePreptask';
+import {LogBox} from 'react-native';
 
 export type RootStackParamList = {
   LandingScreen: {newTransaction?: Transaction} | undefined;
@@ -26,7 +27,7 @@ export type RootStackParamList = {
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
-
+LogBox.ignoreAllLogs();
 const App = () => {
   return (
     <Provider store={store}>

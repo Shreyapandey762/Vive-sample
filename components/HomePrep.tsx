@@ -60,11 +60,12 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
     const result = await launchCamera({mediaType: 'photo', quality: 1});
     if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
       console.log('Image picked:', result.assets[0].uri);
-      setTask({
+      const updatedtask: HomePrepTask = {
         transaction_id: transaction.id,
         images: [{image_thumb_url: result.assets![0].uri!}],
-      });
-      navigation.navigate('HomePreptask', {task: task});
+      };
+      setTask(updatedtask);
+      navigation.navigate('HomePreptask', {task: updatedtask});
     }
   };
 

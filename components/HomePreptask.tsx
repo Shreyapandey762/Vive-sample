@@ -13,6 +13,9 @@ import {
   View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {getDefaultAreaTag, getDefaultWorkTag} from '../utils/api';
+import {useUser} from '../context/UserContext';
+import {transformer} from '../metro.config';
 
 type HomePreptaskNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -24,12 +27,40 @@ interface HomePrepTaskProps {
   navigation: HomePreptaskNavigationProps;
 }
 
+type optionType = {
+  id: string;
+  name: string;
+};
+
 const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
   const [task, setTask] = useState<HomePrepTask>(route.params.task ?? {});
+  const [options, setOptions] = useState<optionType[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<optionType[]>([]);
+  const [inputText, setInputText] = useState<string>('');
+  const [selectedPill, setSelectedPill] = useState<'Work' | 'Area' | null>(
+    null,
+  );
+  const {user} = useUser();
+
   console.log(task);
+
   useEffect(() => {
     setTask(route.params.task);
   }, [route.params]);
+
+  useEffect(() => {
+    const getDefaultOptions = async () => {
+      if (selectedPill === 'Area') {
+        var options = await getDefaultAreaTag(user!, task.transaction_id.$oid);
+        setOptions(options.place_tags);
+      } else if (selectedPill == 'Work') {
+        var options = await getDefaultWorkTag(user!, task.transaction_id.$oid);
+        setOptions(options.work_tags);
+      }
+    };
+
+    getDefaultOptions();
+  }, [selectedPill]);
 
   return (
     <View style={styles.container}>
@@ -49,9 +80,60 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
       <View style={styles.contentContainer}>
         <View style={styles.imageContainer}>
           <Image
-            source={{uri: task.images![0].image_thumb_url! || ''}}
+            source={{uri: task.images?.[0]?.image_thumb_url || ''}}
             style={styles.image}
             resizeMode="cover"
+          />
+        </View>
+      </View>
+      <View style={styles.secondRow}>
+        <View style={styles.pillRow}>
+          {selectedPill ? (
+            <FlatList
+              data={options}
+              numColumns={3}
+              keyExtractor={item => item.id}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  style={[
+                    styles.optionPill,
+                    selectedOptions.includes(item) && styles.selectedOptionPill,
+                  ]}
+                  onPress={() => {}}>
+                  <Text
+                    style={[
+                      styles.optionText,
+                      selectedOptions.includes(item) &&
+                        styles.selectedOptionText,
+                    ]}>
+                    {item.name}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          ) : (
+            <View style={styles.pillContainer}>
+              <TouchableOpacity
+                style={styles.pill}
+                onPress={() => setSelectedPill('Area')}>
+                <Text style={styles.pillText}>Area</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.pill}
+                onPress={() => setSelectedPill('Work')}>
+                <Text style={styles.pillText}>Work</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter text here..."
+            placeholderTextColor={'grey'}
+            value={inputText}
+            onChangeText={setInputText}
           />
         </View>
       </View>
@@ -62,7 +144,7 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 10,
     backgroundColor: '#f5f5f5',
   },
   headerRow: {
@@ -94,7 +176,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   imageContainer: {
-    flex: 0.5,
+    flex: 0.8,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -125,9 +207,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
   },
   pillRow: {
-    flex: 0.2,
-    justifyContent: 'center',
-    alignItems: 'center',
+    // flex: 0.2,
+    // justifyContent: 'center',
+    // alignItems: 'center',
   },
   pillText: {
     fontSize: 16,
@@ -157,12 +239,10 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 50,
-    borderWidth: 1,
-    borderColor: '#ccc',
     borderRadius: 10,
     paddingHorizontal: 10,
     fontSize: 16,
-    backgroundColor: '#fff',
+    borderBottomWidth: 1,
   },
 });
 
