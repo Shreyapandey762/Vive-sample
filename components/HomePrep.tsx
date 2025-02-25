@@ -20,6 +20,7 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../App';
 import {RouteProp} from '@react-navigation/native';
 import {RootState} from '../store';
+import {useFocusEffect} from '@react-navigation/native';
 
 type HomePrepNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -32,7 +33,7 @@ interface HomePrepProps {
 }
 
 const {width} = Dimensions.get('window');
-const CARD_SIZE = width * 0.5;
+const CARD_SIZE = width * 0.4;
 
 const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
   const {transaction} = route.params || {};
@@ -44,22 +45,25 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
 
   const [task, setTask] = useState<HomePrepTask>({} as HomePrepTask);
 
-  useEffect(() => {
-    const apiCall = async () => {
-      try {
-        const res = await sampleFunction(user!, transaction.id.$oid);
-        dispatch(setAllTasks(res.tasks));
-      } catch (error) {
-        console.error('Error calling sampleFunction:', error);
-      }
-    };
-    apiCall();
-  }, [transaction]);
+  useFocusEffect(
+    React.useCallback(() => {
+      const apiCall = async () => {
+        try {
+          const res = await sampleFunction(user!, transaction.id.$oid);
+          dispatch(setAllTasks(res.tasks));
+        } catch (error) {
+          console.error('Error calling sampleFunction:', error);
+        }
+      };
+
+      apiCall();
+      return () => {};
+    }, [transaction, route.params]),
+  );
 
   const handleImagePick = async () => {
     const result = await launchCamera({mediaType: 'photo', quality: 1});
     if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
-      console.log('Image picked:', result.assets[0].uri);
       const updatedtask: HomePrepTask = {
         transaction_id: transaction.id,
         images: [{image_thumb_url: result.assets![0].uri!}],
@@ -93,7 +97,8 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
         contentContainerStyle={styles.listContainer}
         renderItem={({item}) => (
           <View style={styles.taskItem}>
-            <Text style={styles.tagAbove}>{item.place_tag?.name}</Text>
+            <Text style={styles.tagBelow}>{item.work_tag?.name}</Text>
+
             {item?.images &&
             item.images.length > 0 &&
             item.images[0].image_thumb_url ? (
@@ -106,7 +111,10 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
                 <Text style={styles.placeholderText}>No Image</Text>
               </View>
             )}
-            <Text style={styles.tagBelow}>{item.work_tag?.name}</Text>
+            <Text style={styles.tagAbove}>{item.place_tag?.name}</Text>
+
+            <Icon name="tag" size={16} color="black" />
+
             <TextInput
               style={styles.noteInput}
               placeholder="Add note..."

@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {getDefaultAreaTag, getDefaultWorkTag} from '../utils/api';
+import {createTask, getDefaultAreaTag, getDefaultWorkTag} from '../utils/api';
 import {useUser} from '../context/UserContext';
 
 type HomePreptaskNavigationProps = StackNavigationProp<
@@ -86,6 +86,11 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
     setShowDatePicker(false);
   };
 
+  const handleCreateTask = async () => {
+    await createTask(user!, task.transaction_id.$oid);
+    navigation.pop();
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
@@ -97,7 +102,9 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
 
         <Text style={styles.header}>Home Prep</Text>
 
-        <TouchableOpacity style={styles.saveButton} onPress={() => {}}>
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={() => handleCreateTask()}>
           <Text style={styles.saveButtonText}>Done</Text>
         </TouchableOpacity>
       </View>
@@ -198,16 +205,19 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
             />
           )}
         </View>
-
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter text here..."
-            placeholderTextColor={'grey'}
-            value={inputText}
-            onChangeText={setInputText}
-          />
-        </View>
+        {selectedWork.map(e => {
+          return (
+            <View style={styles.inputRow} key={e.id}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter text here..."
+                placeholderTextColor={'grey'}
+                value={inputText}
+                onChangeText={setInputText}
+              />
+            </View>
+          );
+        })}
       </View>
     </View>
   );

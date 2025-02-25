@@ -165,33 +165,40 @@ export const getDefaultWorkTag = async (
 
 export const createTask = async (
   user: User,
-  transaction_id: string | null,
-  transaction: Transaction,
-  homeprep_task: HomePrepTask,
+  transaction_id: string,
+  // transaction: Transaction,
+  // homeprep_task: HomePrepTask,
 ) => {
   try {
-    const formData = new FormData();
-    formData.append('homeprep_task[notes]', homeprep_task.notes);
-    formData.append('transaction_id', transaction.id);
-    formData.append('work_tag', homeprep_task.work_tag);
-    formData.append('place_tag', homeprep_task.place_tag);
+    // const formData = new FormData();
+    // formData.append('homeprep_task[notes]', homeprep_task.notes);
+    // formData.append('transaction_id', transaction_id);
+    // formData.append('work_tag', homeprep_task.work_tag);
+    // formData.append('place_tag', homeprep_task.place_tag);
     // formData.append('transaction[image]', {
     //   uri: transaction.image_url,
     //   name: 'image.png',
     //   type: 'image/png',
     // });
-
-    await axios.post(
-      `https://www.staging.gotvive.com/api/v2/homeprep_tasks?transaction_id=${transaction_id}`,
-      formData,
+    const response = await fetch(
+      `https://staging.gotvive.com/api/v2/homeprep_tasks?transaction_id=${transaction_id}`,
       {
+        method: 'POST',
         headers: {
-          'Content-Type': 'multipart/form-data',
           Accept: 'application/json',
           Authorization: `Bearer ${user.auth_token}`,
+          'Content-Type': 'multipart/form-data',
         },
       },
     );
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
   } catch (e) {
     console.error(e);
   }
