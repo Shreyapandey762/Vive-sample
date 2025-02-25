@@ -6,17 +6,17 @@ import {RouteProp} from '@react-navigation/native';
 import {
   FlatList,
   Image,
-  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
+  Platform,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {getDefaultAreaTag, getDefaultWorkTag} from '../utils/api';
 import {useUser} from '../context/UserContext';
-import DateTimePicker from '@react-native-community/datetimepicker';
 
 type HomePreptaskNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -36,16 +36,16 @@ type OptionType = {
 const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
   const [task, setTask] = useState<HomePrepTask>(route.params.task ?? {});
   const [options, setOptions] = useState<OptionType[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<OptionType[]>([]);
+  const [selectedArea, setSelectedArea] = useState<OptionType | null>(null);
+  const [selectedWork, setSelectedWork] = useState<OptionType[]>([]);
+
   const [inputText, setInputText] = useState<string>('');
   const [selectedPill, setSelectedPill] = useState<'Work' | 'Area' | null>(
     null,
   );
-  const {user} = useUser();
-  const [dueDate, setDueDate] = useState(new Date());
+  const [dueDate, setDueDate] = useState<Date | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
-
-  console.log(task);
+  const {user} = useUser();
 
   useEffect(() => {
     setTask(route.params.task);
@@ -54,22 +54,36 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
   useEffect(() => {
     const getDefaultOptions = async () => {
       if (selectedPill === 'Area') {
-        var options = await getDefaultAreaTag(user!, task.transaction_id.$oid);
-        setOptions(options.place_tags);
-      } else if (selectedPill == 'Work') {
-        var options = await getDefaultWorkTag(user!, task.transaction_id.$oid);
-        setOptions(options.work_tags);
+        const res = await getDefaultAreaTag(user!, task.transaction_id.$oid);
+        setOptions(res.place_tags);
+      } else if (selectedPill === 'Work') {
+        const res = await getDefaultWorkTag(user!, task.transaction_id.$oid);
+        setOptions(res.work_tags);
       }
     };
 
-    getDefaultOptions();
+    if (selectedPill) getDefaultOptions();
   }, [selectedPill]);
 
-  const onChangeDate = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selectedDate) {
-      setDueDate(selectedDate);
+  const handleTagSelection = (item: OptionType) => {
+    if (selectedPill === 'Area') {
+      setSelectedArea(item);
+      setSelectedPill(null);
+    } else if (selectedPill === 'Work') {
+      setSelectedWork(prevSelected => {
+        const exists = prevSelected.some(tag => tag.id === item.id);
+        if (exists) {
+          return prevSelected.filter(tag => tag.id !== item.id);
+        } else {
+          return [...prevSelected, {...item, note: ''}];
+        }
+      });
+      setSelectedPill(null);
     }
+  };
+  const handleDateChange = (_event: any, selectedDate?: Date) => {
+    if (selectedDate) setDueDate(selectedDate);
+    setShowDatePicker(false);
   };
 
   return (
@@ -87,6 +101,7 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
           <Text style={styles.saveButtonText}>Done</Text>
         </TouchableOpacity>
       </View>
+
       <View style={styles.contentContainer}>
         <View style={styles.imageContainer}>
           <Image
@@ -96,9 +111,10 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
           />
         </View>
       </View>
+
       <View style={styles.secondRow}>
         <View style={styles.pillContainer}>
-          {selectedPill ? (
+          {selectedPill === 'Area' ? (
             <FlatList
               data={options}
               horizontal={true}
@@ -106,35 +122,80 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
               keyExtractor={item => item.id}
               renderItem={({item}) => (
                 <TouchableOpacity
-                  style={[
-                    styles.optionPill,
-                    selectedOptions.includes(item) && styles.selectedOptionPill,
-                  ]}
-                  onPress={() => {}}>
-                  <Text
-                    style={[
-                      styles.optionText,
-                      selectedOptions.includes(item) &&
-                        styles.selectedOptionText,
-                    ]}>
-                    {item.name}
-                  </Text>
+                  style={styles.optionPill}
+                  onPress={() => handleTagSelection(item)}>
+                  <Text style={styles.optionText}>{item.name}</Text>
                 </TouchableOpacity>
               )}
             />
           ) : (
-            <>
-              <TouchableOpacity
-                style={styles.pill}
-                onPress={() => setSelectedPill('Area')}>
-                <Text style={styles.pillText}>Area</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.pill}
-                onPress={() => setSelectedPill('Work')}>
-                <Text style={styles.pillText}>Work</Text>
-              </TouchableOpacity>
-            </>
+            <TouchableOpacity
+              style={styles.pill}
+              onPress={() => setSelectedPill('Area')}>
+              <Text style={styles.pillText}>
+                {selectedArea ? selectedArea.name : 'Area'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {selectedPill === 'Work' ? (
+            <View style={styles.multiselectContainer}>
+              <FlatList
+                data={options}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={item => item.id}
+                renderItem={({item}) => {
+                  const isSelected = selectedWork.some(
+                    tag => tag.id === item.id,
+                  );
+                  return (
+                    <TouchableOpacity
+                      style={[
+                        styles.optionPill,
+                        isSelected && styles.selectedOptionPill,
+                      ]}
+                      onPress={() => handleTagSelection(item)}>
+                      <Text
+                        style={[
+                          styles.optionText,
+                          isSelected && styles.selectedOptionText,
+                        ]}>
+                        {item.name}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={styles.pill}
+              onPress={() => setSelectedPill('Work')}>
+              <Text style={styles.pillText}>
+                {selectedWork.length > 0
+                  ? selectedWork.map(tag => tag.name).join(', ')
+                  : 'Work'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <View style={styles.datePickerContainer}>
+          <TouchableOpacity
+            style={styles.pill}
+            onPress={() => setShowDatePicker(true)}>
+            <Text style={styles.pillText}>
+              {dueDate ? dueDate.toDateString() : 'Set Due Date'}
+            </Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={dueDate || new Date()}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              onChange={handleDateChange}
+            />
           )}
         </View>
 
@@ -147,22 +208,6 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
             onChangeText={setInputText}
           />
         </View>
-        <TouchableOpacity
-          style={styles.datePickerButton}
-          onPress={() => setShowDatePicker(true)}>
-          <Text style={styles.datePickerText}>
-            Due Date: {dueDate.toDateString()}
-          </Text>
-        </TouchableOpacity>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={dueDate}
-            mode="date"
-            display="default"
-            onChange={onChangeDate}
-          />
-        )}
       </View>
     </View>
   );
@@ -284,6 +329,11 @@ const styles = StyleSheet.create({
   datePickerText: {
     color: 'black',
     fontSize: 16,
+  },
+  datePickerContainer: {marginTop: 10},
+  multiselectContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 
