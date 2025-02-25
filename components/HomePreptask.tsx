@@ -6,6 +6,7 @@ import {RouteProp} from '@react-navigation/native';
 import {
   FlatList,
   Image,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -15,7 +16,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {getDefaultAreaTag, getDefaultWorkTag} from '../utils/api';
 import {useUser} from '../context/UserContext';
-import {transformer} from '../metro.config';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 type HomePreptaskNavigationProps = StackNavigationProp<
   RootStackParamList,
@@ -27,20 +28,22 @@ interface HomePrepTaskProps {
   navigation: HomePreptaskNavigationProps;
 }
 
-type optionType = {
+type OptionType = {
   id: string;
   name: string;
 };
 
 const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
   const [task, setTask] = useState<HomePrepTask>(route.params.task ?? {});
-  const [options, setOptions] = useState<optionType[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<optionType[]>([]);
+  const [options, setOptions] = useState<OptionType[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<OptionType[]>([]);
   const [inputText, setInputText] = useState<string>('');
   const [selectedPill, setSelectedPill] = useState<'Work' | 'Area' | null>(
     null,
   );
   const {user} = useUser();
+  const [dueDate, setDueDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   console.log(task);
 
@@ -61,6 +64,13 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
 
     getDefaultOptions();
   }, [selectedPill]);
+
+  const onChangeDate = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (selectedDate) {
+      setDueDate(selectedDate);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -87,11 +97,12 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
         </View>
       </View>
       <View style={styles.secondRow}>
-        <View style={styles.pillRow}>
+        <View style={styles.pillContainer}>
           {selectedPill ? (
             <FlatList
               data={options}
-              numColumns={3}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
               keyExtractor={item => item.id}
               renderItem={({item}) => (
                 <TouchableOpacity
@@ -112,7 +123,7 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
               )}
             />
           ) : (
-            <View style={styles.pillContainer}>
+            <>
               <TouchableOpacity
                 style={styles.pill}
                 onPress={() => setSelectedPill('Area')}>
@@ -123,7 +134,7 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
                 onPress={() => setSelectedPill('Work')}>
                 <Text style={styles.pillText}>Work</Text>
               </TouchableOpacity>
-            </View>
+            </>
           )}
         </View>
 
@@ -136,6 +147,22 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
             onChangeText={setInputText}
           />
         </View>
+        <TouchableOpacity
+          style={styles.datePickerButton}
+          onPress={() => setShowDatePicker(true)}>
+          <Text style={styles.datePickerText}>
+            Due Date: {dueDate.toDateString()}
+          </Text>
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <DateTimePicker
+            value={dueDate}
+            mode="date"
+            display="default"
+            onChange={onChangeDate}
+          />
+        )}
       </View>
     </View>
   );
@@ -173,10 +200,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   contentContainer: {
-    flex: 1,
+    flex: 0.5,
   },
   imageContainer: {
-    flex: 0.8,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -189,27 +216,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#666',
   },
-  secondRow: {
-    flex: 0.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pillContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignSelf: 'flex-start',
-    gap: 15,
-  },
   pill: {
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
-    backgroundColor: '#ddd',
-  },
-  pillRow: {
-    // flex: 0.2,
-    // justifyContent: 'center',
-    // alignItems: 'center',
+    backgroundColor: 'turquoise',
   },
   pillText: {
     fontSize: 16,
@@ -230,12 +241,6 @@ const styles = StyleSheet.create({
   selectedOptionText: {
     color: 'white',
   },
-  inputRow: {
-    flex: 0.8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
   input: {
     width: '100%',
     height: 50,
@@ -243,6 +248,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     fontSize: 16,
     borderBottomWidth: 1,
+  },
+  secondRow: {
+    flex: 0.5,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    width: '100%',
+  },
+
+  pillContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+    marginLeft: 15,
+    gap: 10,
+  },
+
+  pillRow: {
+    alignSelf: 'stretch',
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+
+  inputRow: {
+    width: '100%',
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
+  datePickerButton: {
+    marginTop: 10,
+    padding: 10,
+    alignItems: 'center',
+  },
+  datePickerText: {
+    color: 'black',
+    fontSize: 16,
   },
 });
 

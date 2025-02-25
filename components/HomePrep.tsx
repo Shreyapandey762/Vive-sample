@@ -92,20 +92,26 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
         keyExtractor={item => item.id?.$oid ?? ''}
         contentContainerStyle={styles.listContainer}
         renderItem={({item}) => (
-          <View style={styles.taskWrapper}>
-            <View style={styles.taskCard}>
-              <Text style={styles.taskTitle}>{item.work_tag?.name}</Text>
-              <Text style={styles.taskStatus}>Status: {item.status}</Text>
+          <View style={styles.taskItem}>
+            <Text style={styles.tagAbove}>{item.place_tag?.name}</Text>
+            {item?.images &&
+            item.images.length > 0 &&
+            item.images[0].image_thumb_url ? (
               <Image
-                source={{
-                  uri:
-                    item?.images!.length > 0
-                      ? item.images![0].image_thumb_url!
-                      : '',
-                }}
-                style={styles.taskImage}
+                source={{uri: item.images[0].image_thumb_url}}
+                style={styles.squareImage}
               />
-            </View>
+            ) : (
+              <View style={[styles.squareImage, styles.placeholderImage]}>
+                <Text style={styles.placeholderText}>No Image</Text>
+              </View>
+            )}
+            <Text style={styles.tagBelow}>{item.work_tag?.name}</Text>
+            <TextInput
+              style={styles.noteInput}
+              placeholder="Add note..."
+              placeholderTextColor="#666"
+            />
           </View>
         )}
       />
@@ -119,7 +125,7 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
           <Icon name="camera" size={20} color="black" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => {}} style={styles.cameraButton}>
-          <Icon name="edit" size={20} color={'black'} />
+          <Icon name="edit" size={20} color="black" />
         </TouchableOpacity>
       </Animated.View>
 
@@ -151,49 +157,45 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     alignItems: 'flex-start',
+    paddingBottom: 20,
   },
-  taskWrapper: {
+  taskItem: {
+    marginBottom: 20,
     alignItems: 'flex-start',
-    marginBottom: 10,
+    width: CARD_SIZE,
   },
-  taskCard: {
+  tagAbove: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  squareImage: {
     width: CARD_SIZE,
     height: CARD_SIZE,
-    backgroundColor: '#fff',
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    resizeMode: 'cover',
   },
-  taskTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 5,
+  placeholderImage: {
+    backgroundColor: '#ccc',
+    alignItems: 'flex-start',
   },
-  taskStatus: {
-    fontSize: 12,
+  placeholderText: {
     color: '#666',
-    marginBottom: 5,
   },
-  taskImage: {
-    width: 60,
-    height: 60,
-    marginBottom: 5,
-    borderRadius: 5,
+  tagBelow: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 5,
   },
   noteInput: {
     width: CARD_SIZE,
     padding: 6,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    fontSize: 12,
+    fontSize: 14,
     marginTop: 5,
   },
   cameraContainer: {
     position: 'absolute',
     bottom: 20,
     right: 20,
-    display: 'flex',
     flexDirection: 'row',
   },
   cameraButton: {
@@ -201,15 +203,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 50,
     elevation: 5,
+    marginLeft: 10,
   },
-  arrowButton: {
-    // position: 'absolute',
-    // bottom: 25,
-    // right: 100,
-    // backgroundColor: 'white',
-    // padding: 10,
-    // elevation: 5,
-  },
+  arrowButton: {},
 });
-
 export default HomePrep;
