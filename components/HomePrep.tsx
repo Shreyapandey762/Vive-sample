@@ -43,8 +43,6 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
 
   const tasks = useSelector((state: RootState) => state.transactions.tasks);
 
-  // const [task, setTask] = useState<HomePrepTask>({} as HomePrepTask);
-
   useFocusEffect(
     React.useCallback(() => {
       const apiCall = async () => {
@@ -97,37 +95,41 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
         keyExtractor={item => item.id?.$oid ?? ''}
         contentContainerStyle={styles.listContainer}
         renderItem={({item}) => (
-          <View style={styles.taskItem}>
-            <Text style={styles.tagBelow}>{item.work_tag?.name}</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('HomePreptask', {task: item})}>
+            <View style={styles.taskItem}>
+              <Text style={styles.tagBelow}>{item.work_tag?.name}</Text>
 
-            {item?.images &&
-            item.images.length > 0 &&
-            item.images[0].image_thumb_url ? (
-              <Image
-                source={{uri: item.images[0].image_thumb_url}}
-                style={styles.squareImage}
-              />
-            ) : (
-              <View style={[styles.squareImage, styles.placeholderImage]}>
-                <Text style={styles.placeholderText}>No Image</Text>
+              {item?.images &&
+              item.images.length > 0 &&
+              item.images[0].image_thumb_url ? (
+                <Image
+                  source={{uri: item.images[0].image_thumb_url}}
+                  style={styles.squareImage}
+                />
+              ) : (
+                <View style={[styles.squareImage, styles.placeholderImage]}>
+                  <Text style={styles.placeholderText}>No Image</Text>
+                </View>
+              )}
+              <View
+                style={{flexDirection: 'row-reverse', alignItems: 'center'}}>
+                <Text style={styles.tagAbove}>{item.place_tag?.name}</Text>
+                <Icon
+                  name="tag"
+                  size={16}
+                  color="black"
+                  style={{marginRight: 5}}
+                />
               </View>
-            )}
-            <View style={{flexDirection: 'row-reverse', alignItems: 'center'}}>
-              <Text style={styles.tagAbove}>{item.place_tag?.name}</Text>
-              <Icon
-                name="tag"
-                size={16}
-                color="black"
-                style={{marginRight: 5}}
+              <TextInput
+                style={styles.noteInput}
+                placeholder="Add note..."
+                value={item.notes}
+                placeholderTextColor="#666"
               />
             </View>
-            <TextInput
-              style={styles.noteInput}
-              placeholder="Add note..."
-              value={item.notes}
-              placeholderTextColor="#666"
-            />
-          </View>
+          </TouchableOpacity>
         )}
       />
 
