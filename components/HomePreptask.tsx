@@ -87,7 +87,14 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
   };
 
   const handleCreateTask = async () => {
-    await createTask(user!, task.transaction_id.$oid);
+    const payload = {
+      homeprep_task: {
+        place_tag_id: selectedArea?.id,
+        work_tag_id: selectedWork[0]?.id,
+        notes: inputText,
+      },
+    };
+    await createTask(user!, task.transaction_id.$oid, payload);
     navigation.pop();
   };
 

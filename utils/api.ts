@@ -168,18 +168,27 @@ export const createTask = async (
   transaction_id: string,
   // transaction: Transaction,
   // homeprep_task: HomePrepTask,
+  payload: any,
 ) => {
   try {
-    // const formData = new FormData();
-    // formData.append('homeprep_task[notes]', homeprep_task.notes);
+    const formData = new FormData();
+    formData.append('homeprep_task[notes]', payload.homeprep_task.notes);
     // formData.append('transaction_id', transaction_id);
-    // formData.append('work_tag', homeprep_task.work_tag);
-    // formData.append('place_tag', homeprep_task.place_tag);
+    formData.append(
+      'homeprep_task[work_tag_id]',
+      payload.homeprep_task.work_tag_id,
+    );
+    formData.append(
+      'homeprep_task[place_tag_id]',
+      payload.homeprep_task.place_tag_id,
+    );
     // formData.append('transaction[image]', {
     //   uri: transaction.image_url,
     //   name: 'image.png',
     //   type: 'image/png',
     // });
+
+    console.log(formData);
     const response = await fetch(
       `https://staging.gotvive.com/api/v2/homeprep_tasks?transaction_id=${transaction_id}`,
       {
@@ -189,8 +198,11 @@ export const createTask = async (
           Authorization: `Bearer ${user.auth_token}`,
           'Content-Type': 'multipart/form-data',
         },
+        body: formData,
       },
     );
+
+    console.log(response);
 
     if (!response.ok) {
       throw new Error('Network response was not ok');

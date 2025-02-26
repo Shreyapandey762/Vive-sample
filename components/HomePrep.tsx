@@ -111,13 +111,19 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
                 <Text style={styles.placeholderText}>No Image</Text>
               </View>
             )}
-            <Text style={styles.tagAbove}>{item.place_tag?.name}</Text>
-
-            <Icon name="tag" size={16} color="black" />
-
+            <View style={{flexDirection: 'row-reverse', alignItems: 'center'}}>
+              <Text style={styles.tagAbove}>{item.place_tag?.name}</Text>
+              <Icon
+                name="tag"
+                size={16}
+                color="black"
+                style={{marginRight: 5}}
+              />
+            </View>
             <TextInput
               style={styles.noteInput}
               placeholder="Add note..."
+              value={item.notes}
               placeholderTextColor="#666"
             />
           </View>
@@ -176,6 +182,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
+    alignSelf: 'flex-start',
   },
   squareImage: {
     width: CARD_SIZE,
