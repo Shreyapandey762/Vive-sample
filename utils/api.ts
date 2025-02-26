@@ -235,3 +235,24 @@ export const updateHomePrepTask = async (
     console.error(err);
   }
 };
+
+export const deleteTask = async (user: User, taskId: string) => {
+  try {
+    const res = await fetch(
+      `https://staging.gotvive.com/api/v2/homeprep_tasks/${taskId}/remove_homeprep_task`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${user.auth_token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    console.log(res);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error(err);
+  }
+};

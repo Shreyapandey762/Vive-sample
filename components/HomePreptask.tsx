@@ -12,11 +12,13 @@ import {
   TouchableOpacity,
   View,
   Platform,
+  Alert,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   createTask,
+  deleteTask,
   getDefaultAreaTag,
   getDefaultWorkTag,
   updateHomePrepTask,
@@ -109,6 +111,30 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
     setShowDatePicker(false);
   };
 
+  const handleDeleteTask = async () => {
+    if (task.id) {
+      await deleteTask(user!, task.id.$oid);
+    }
+    navigation.goBack();
+    Alert.alert('Success', 'Transaction deleted!');
+  };
+
+  const handleMenuPress = () => {
+    Alert.alert(
+      'Actions',
+      'Select an action',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Delete Transaction',
+          onPress: handleDeleteTask,
+          style: 'destructive',
+        },
+      ],
+      {cancelable: true},
+    );
+  };
+
   const handleCreateTask = async () => {
     const payload = {
       transaction_id: task.transaction_id.$oid,
@@ -141,6 +167,9 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
           <Text style={styles.saveButtonText}>Done</Text>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
+        <Icon name="ellipsis-v" size={24} color="black" />
+      </TouchableOpacity>
 
       <View style={styles.contentContainer}>
         <View style={styles.imageContainer}>
@@ -280,7 +309,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 30,
     borderRadius: 5,
   },
   saveButtonText: {
@@ -377,6 +406,12 @@ const styles = StyleSheet.create({
   multiselectContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 20,
+    right: 10,
+    padding: 10,
   },
 });
 
