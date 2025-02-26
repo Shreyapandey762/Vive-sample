@@ -72,12 +72,32 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
     Alert.alert('Success', 'Transaction saved!');
   };
 
+  const handleMenuPress = () => {
+    Alert.alert(
+      'Actions',
+      'Select an action',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Delete Transaction',
+          onPress: handleDeleteTransaction,
+          style: 'destructive',
+        },
+      ],
+      {cancelable: true},
+    );
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
         onPress={() => navigation.goBack()}
         style={styles.backButton}>
         <Icon name="arrow-left" size={24} color="black" />
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
+        <Icon name="ellipsis-v" size={24} color="black" />
       </TouchableOpacity>
 
       <Text style={styles.header}>Selling Transaction</Text>
@@ -120,12 +140,12 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
         onPress={handleSaveTransaction}>
         <Text style={styles.saveButtonText}>Save Transaction</Text>
       </TouchableOpacity>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.deleteButton}
         onPress={handleDeleteTransaction}
         disabled={!transaction1.id}>
         <Text style={styles.deleteButtonText}>Delete Transaction</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <Text style={styles.listingheader}>ACTIVITIES</Text>
       <View style={styles.horizontalAlign}>
         <TouchableOpacity onPress={() => navigation.navigate('ListingPlan')}>
@@ -248,6 +268,12 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: 'white',
     fontSize: 16,
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    padding: 10,
   },
 });
 
