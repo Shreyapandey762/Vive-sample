@@ -163,32 +163,26 @@ export const getDefaultWorkTag = async (
   }
 };
 
-export const createTask = async (
-  user: User,
-  transaction_id: string,
-  // transaction: Transaction,
-  // homeprep_task: HomePrepTask,
-  payload: any,
-) => {
+export const createTask = async (user: User, transaction_id: string) => {
   try {
-    const formData = new FormData();
-    formData.append('homeprep_task[notes]', payload.homeprep_task.notes);
-    // formData.append('transaction_id', transaction_id);
-    formData.append(
-      'homeprep_task[work_tag_id]',
-      payload.homeprep_task.work_tag_id,
-    );
-    formData.append(
-      'homeprep_task[place_tag_id]',
-      payload.homeprep_task.place_tag_id,
-    );
+    // const formData = new FormData();
+    // formData.append('homeprep_task[notes]', payload.homeprep_task.notes);
+    // // formData.append('transaction_id', transaction_id);
+    // formData.append(
+    //   'homeprep_task[work_tag_id]',
+    //   payload.homeprep_task.work_tag_id,
+    // );
+    // formData.append(
+    //   'homeprep_task[place_tag_id]',
+    //   payload.homeprep_task.place_tag_id,
+    // );
     // formData.append('transaction[image]', {
     //   uri: transaction.image_url,
     //   name: 'image.png',
     //   type: 'image/png',
     // });
 
-    console.log(formData);
+    // console.log(formData);
     const response = await fetch(
       `https://staging.gotvive.com/api/v2/homeprep_tasks?transaction_id=${transaction_id}`,
       {
@@ -198,7 +192,7 @@ export const createTask = async (
           Authorization: `Bearer ${user.auth_token}`,
           'Content-Type': 'multipart/form-data',
         },
-        body: formData,
+        // body: formData,
       },
     );
 
@@ -213,5 +207,31 @@ export const createTask = async (
     return data;
   } catch (e) {
     console.error(e);
+  }
+};
+
+export const updateHomePrepTask = async (
+  user: User,
+  payload: any,
+  homePrepTaskId: string,
+) => {
+  try {
+    const res = await fetch(
+      `https://staging.gotvive.com/api/v2/homeprep_tasks/${homePrepTaskId}`,
+      {
+        method: 'PUT',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${user.auth_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+    console.log(res);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error(err);
   }
 };

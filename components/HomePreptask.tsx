@@ -15,7 +15,12 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {createTask, getDefaultAreaTag, getDefaultWorkTag} from '../utils/api';
+import {
+  createTask,
+  getDefaultAreaTag,
+  getDefaultWorkTag,
+  updateHomePrepTask,
+} from '../utils/api';
 import {useUser} from '../context/UserContext';
 
 type HomePreptaskNavigationProps = StackNavigationProp<
@@ -35,9 +40,27 @@ type OptionType = {
 
 const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
   const [task, setTask] = useState<HomePrepTask>(route.params.task ?? {});
+
   const [options, setOptions] = useState<OptionType[]>([]);
-  const [selectedArea, setSelectedArea] = useState<OptionType | null>(null);
-  const [selectedWork, setSelectedWork] = useState<OptionType[]>([]);
+
+  const [selectedArea, setSelectedArea] = useState<OptionType | null>(
+    route.params.task.place_tag
+      ? {
+          id: route.params.task.place_tag.id.$oid,
+          name: route.params.task.place_tag.name,
+        }
+      : null,
+  );
+  const [selectedWork, setSelectedWork] = useState<OptionType[]>(
+    route.params.task.work_tag
+      ? [
+          {
+            id: route.params.task.work_tag.id.$oid,
+            name: route.params.task.work_tag.name,
+          },
+        ]
+      : [],
+  );
 
   const [inputText, setInputText] = useState<string>('');
   const [selectedPill, setSelectedPill] = useState<'Work' | 'Area' | null>(
@@ -88,13 +111,16 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
 
   const handleCreateTask = async () => {
     const payload = {
-      homeprep_task: {
-        place_tag_id: selectedArea?.id,
-        work_tag_id: selectedWork[0]?.id,
-        notes: inputText,
-      },
+      transaction_id: task.transaction_id.$oid,
+      local_image_url: task.local_image_url,
+      place_tag_id: selectedArea?.id,
+      work_tags: selectedWork.map(e => {
+        return {id: e.id};
+      }),
     };
-    await createTask(user!, task.transaction_id.$oid, payload);
+    console.log(payload);
+    const res = await updateHomePrepTask(user!, payload, task.id!.$oid);
+    console.log(res);
     navigation.pop();
   };
 
@@ -119,7 +145,7 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
       <View style={styles.contentContainer}>
         <View style={styles.imageContainer}>
           <Image
-            source={{uri: task.images?.[0]?.image_thumb_url || ''}}
+            source={{uri: task.images?.[0]?.image_url || ''}}
             style={styles.image}
             resizeMode="cover"
           />

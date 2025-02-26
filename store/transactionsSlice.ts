@@ -42,12 +42,41 @@ export type Transaction = {
 export type HomePrepTask = {
   id?: {$oid: string};
   transaction_id: {$oid: string};
-  work_tag?: {name: string};
-  place_tag?: {name: string};
+  work_tag?: {
+    id: {$oid: string};
+    name: string;
+    created_at: Date;
+    created_by: string | null;
+    modified_by: string | null;
+    updated_at: Date;
+  };
+  place_tag?: {
+    id: {$oid: string};
+    name: string;
+    active: boolean;
+    name_ix: string;
+    full_name: string;
+    created_at: Date;
+    created_by: string | null;
+    modified_by: string | null;
+    updated_at: Date | null;
+  };
   status?: string;
   images?: TaskImage[];
   notes?: string;
+  local_image_url: string | null;
 };
+
+// {
+//   "id": {
+//       "$oid": "67bdde156e497c7a432a605a"
+//   },
+//   "name": "painting",
+//   "created_at": "2025-02-25T07:13:25.562-08:00",
+//   "created_by": null,
+//   "modified_by": null,
+//   "updated_at": "2025-02-25T07:13:25.562-08:00"
+// }
 
 export type TaskImage = {
   id?: {$oid: string};

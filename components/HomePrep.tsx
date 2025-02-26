@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {sampleFunction} from '../utils/api';
+import {createTask, sampleFunction} from '../utils/api';
 import {useUser} from '../context/UserContext';
 import {useDispatch, useSelector} from 'react-redux';
 import {HomePrepTask, setAllTasks} from '../store/transactionsSlice';
@@ -43,7 +43,7 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
 
   const tasks = useSelector((state: RootState) => state.transactions.tasks);
 
-  const [task, setTask] = useState<HomePrepTask>({} as HomePrepTask);
+  // const [task, setTask] = useState<HomePrepTask>({} as HomePrepTask);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -64,12 +64,13 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
   const handleImagePick = async () => {
     const result = await launchCamera({mediaType: 'photo', quality: 1});
     if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
-      const updatedtask: HomePrepTask = {
-        transaction_id: transaction.id,
-        images: [{image_thumb_url: result.assets![0].uri!}],
+      const res = await createTask(user!, transaction.id.$oid);
+      const updatedTask: HomePrepTask = {
+        ...res.task,
+        local_image_url: result.assets![0].uri!,
+        images: [...res.task.images, {image_url: result.assets![0].uri!}],
       };
-      setTask(updatedtask);
-      navigation.navigate('HomePreptask', {task: updatedtask});
+      navigation.navigate('HomePreptask', {task: updatedTask});
     }
   };
 
