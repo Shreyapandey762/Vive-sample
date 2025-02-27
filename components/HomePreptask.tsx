@@ -106,10 +106,6 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
       setSelectedPill(null);
     }
   };
-  const handleDateChange = (_event: any, selectedDate?: Date) => {
-    if (selectedDate) setDueDate(selectedDate);
-    setShowDatePicker(false);
-  };
 
   const handleDeleteTask = async () => {
     if (task.id) {
@@ -121,12 +117,12 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
 
   const handleMenuPress = () => {
     Alert.alert(
-      'Actions',
-      'Select an action',
+      'Remove Task',
+      'Are you sure you want to remove this task?',
       [
-        {text: 'Cancel', style: 'cancel'},
+        {text: 'No', style: 'cancel'},
         {
-          text: 'Delete Transaction',
+          text: 'Yes',
           onPress: handleDeleteTask,
           style: 'destructive',
         },
@@ -250,23 +246,6 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
           )}
         </View>
 
-        <View style={styles.datePickerContainer}>
-          <TouchableOpacity
-            style={styles.pill}
-            onPress={() => setShowDatePicker(true)}>
-            <Text style={styles.pillText}>
-              {dueDate ? dueDate.toDateString() : 'Set Due Date'}
-            </Text>
-          </TouchableOpacity>
-          {showDatePicker && (
-            <DateTimePicker
-              value={dueDate || new Date()}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'inline' : 'default'}
-              onChange={handleDateChange}
-            />
-          )}
-        </View>
         {selectedWork.map(e => {
           return (
             <View style={styles.inputRow} key={e.id}>

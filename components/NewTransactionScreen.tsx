@@ -41,7 +41,6 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
   );
   const DEFAULT_IMAGE_URL =
     'https://vive-media.s3.us-west-2.amazonaws.com/staging/images/transaction/67c029676e497c7a392a6048/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAWW6QHOQBG7RJSYXW%2F20250227%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250227T092949Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=5d4bc823ea233993e83529cf886e338dd5635b5c64abe7a6332b16bd6702a048';
-
   useEffect(() => {
     setTransaction1(route.params.transaction);
   }, [route.params.transaction]);

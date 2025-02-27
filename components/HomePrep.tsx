@@ -141,9 +141,6 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
         <TouchableOpacity onPress={handleImagePick} style={styles.cameraButton}>
           <Icon name="camera" size={20} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {}} style={styles.cameraButton}>
-          <Icon name="edit" size={20} color="black" />
-        </TouchableOpacity>
       </Animated.View>
 
       <TouchableOpacity onPress={slideIn} style={styles.arrowButton}>
