@@ -30,7 +30,6 @@ interface NewTransactionScreenProps {
   route: RouteProp<RootStackParamList, 'NewTransactionScreen'>;
   navigation: NewTransactionScreenNavigationProp;
 }
-
 const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
   route,
   navigation,
@@ -40,6 +39,8 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
   const [transaction1, setTransaction1] = useState<Transaction>(
     route.params.transaction,
   );
+  const DEFAULT_IMAGE_URL =
+    'https://vive-media.s3.us-west-2.amazonaws.com/staging/images/transaction/67c029676e497c7a392a6048/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAWW6QHOQBG7RJSYXW%2F20250227%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250227T092949Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=5d4bc823ea233993e83529cf886e338dd5635b5c64abe7a6332b16bd6702a048';
 
   useEffect(() => {
     setTransaction1(route.params.transaction);
@@ -60,7 +61,6 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
       await deleteTransaction(user!, transaction1.id.$oid);
     }
     navigation.navigate('LandingScreen');
-    Alert.alert('Success', 'Transaction deleted!');
   };
 
   const handleSaveTransaction = async () => {
@@ -103,9 +103,18 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
 
       <TouchableOpacity onPress={handleImagePick} style={styles.cameraButton}>
         <View style={styles.plusIconContainer}>
-          <Icon name="camera" size={50} color="black" />
+          {transaction1.image_url &&
+          transaction1.image_url !== DEFAULT_IMAGE_URL ? (
+            <Image
+              source={{uri: transaction1.image_url}}
+              style={styles.imagePreview}
+            />
+          ) : (
+            <Icon name="camera" size={50} color="black" />
+          )}
         </View>
       </TouchableOpacity>
+
       <TextInput
         style={styles.title}
         onChangeText={(text: string) => {
@@ -123,12 +132,7 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
         placeholderTextColor="grey"
         style={styles.textInput}
       />
-      {transaction1.image_url && (
-        <Image
-          source={{uri: transaction1.image_url}}
-          style={styles.imagePreview}
-        />
-      )}
+
       <TouchableOpacity
         style={[
           styles.saveButton,
@@ -139,12 +143,7 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
         onPress={handleSaveTransaction}>
         <Text style={styles.saveButtonText}>Save Transaction</Text>
       </TouchableOpacity>
-      {/* <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={handleDeleteTransaction}
-        disabled={!transaction1.id}>
-        <Text style={styles.deleteButtonText}>Delete Transaction</Text>
-      </TouchableOpacity> */}
+
       <Text style={styles.listingheader}>ACTIVITIES</Text>
       <View style={styles.horizontalAlign}>
         <TouchableOpacity onPress={() => navigation.navigate('ListingPlan')}>

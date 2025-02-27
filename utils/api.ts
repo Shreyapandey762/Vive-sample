@@ -169,24 +169,6 @@ export const getDefaultWorkTag = async (
 
 export const createTask = async (user: User, transaction_id: string) => {
   try {
-    // const formData = new FormData();
-    // formData.append('homeprep_task[notes]', payload.homeprep_task.notes);
-    // // formData.append('transaction_id', transaction_id);
-    // formData.append(
-    //   'homeprep_task[work_tag_id]',
-    //   payload.homeprep_task.work_tag_id,
-    // );
-    // formData.append(
-    //   'homeprep_task[place_tag_id]',
-    //   payload.homeprep_task.place_tag_id,
-    // );
-    // formData.append('transaction[image]', {
-    //   uri: transaction.image_url,
-    //   name: 'image.png',
-    //   type: 'image/png',
-    // });
-
-    // console.log(formData);
     const response = await fetch(
       `https://staging.gotvive.com/api/v2/homeprep_tasks?transaction_id=${transaction_id}`,
       {
@@ -196,7 +178,6 @@ export const createTask = async (user: User, transaction_id: string) => {
           Authorization: `Bearer ${user.auth_token}`,
           'Content-Type': 'multipart/form-data',
         },
-        // body: formData,
       },
     );
 

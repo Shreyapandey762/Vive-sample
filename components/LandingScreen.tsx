@@ -46,7 +46,6 @@ const LandingScreen: React.FC = () => {
   const handleCreate = async () => {
     if (name) {
       const transaction = await createTransaction(user!, name);
-      console.log('Created Transaction:', transaction);
       if (!transaction) {
         Alert.alert('Error', 'Transaction creation failed. Please try again.');
         return;
