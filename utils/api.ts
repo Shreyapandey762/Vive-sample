@@ -47,6 +47,10 @@ export const updateTransaction = async (
   try {
     const formData = new FormData();
     formData.append('transaction[name]', transaction.name);
+    formData.append(
+      'transaction[address_attributes][full_address]',
+      transaction.full_address,
+    );
     formData.append('transaction[image]', {
       uri: transaction.image_url,
       name: 'image.png',

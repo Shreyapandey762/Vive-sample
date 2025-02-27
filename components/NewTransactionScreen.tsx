@@ -116,7 +116,7 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
       </TextInput>
       <TextInput
         placeholder="Address of the house"
-        value={transaction1.full_address!}
+        value={transaction1.full_address || ''}
         onChangeText={(text: string) =>
           setTransaction1(prev => ({...prev, full_address: text}))
         }
@@ -232,6 +232,7 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     padding: 5,
     fontSize: 16,
+    color: 'black',
   },
   imagePreview: {
     width: 100,
