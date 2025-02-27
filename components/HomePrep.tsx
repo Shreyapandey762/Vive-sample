@@ -1,8 +1,225 @@
-import React from 'react';
-import {Text} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Animated,
+  TextInput,
+  Dimensions,
+} from 'react-native';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import {createTask, sampleFunction} from '../utils/api';
+import {useUser} from '../context/UserContext';
+import {useDispatch, useSelector} from 'react-redux';
+import {HomePrepTask, setAllTasks} from '../store/transactionsSlice';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RootStackParamList} from '../App';
+import {RouteProp} from '@react-navigation/native';
+import {RootState} from '../store';
+import {useFocusEffect} from '@react-navigation/native';
 
-const HomePrep: React.FC = () => {
-  return <Text>HomePrep</Text>;
+type HomePrepNavigationProps = StackNavigationProp<
+  RootStackParamList,
+  'HomePrep'
+>;
+
+interface HomePrepProps {
+  route: RouteProp<RootStackParamList, 'HomePrep'>;
+  navigation: HomePrepNavigationProps;
+}
+
+const {width} = Dimensions.get('window');
+const CARD_SIZE = width * 0.4;
+
+const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
+  const {transaction} = route.params || {};
+  const {user} = useUser();
+  const dispatch = useDispatch();
+  const slideAnim = useState(new Animated.Value(100))[0];
+
+  const tasks = useSelector((state: RootState) => state.transactions.tasks);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const apiCall = async () => {
+        try {
+          const res = await sampleFunction(user!, transaction.id.$oid);
+          dispatch(setAllTasks(res.tasks));
+        } catch (error) {
+          console.error('Error calling sampleFunction:', error);
+        }
+      };
+
+      apiCall();
+      return () => {};
+    }, [transaction, route.params]),
+  );
+
+  const handleImagePick = async () => {
+    const result = await launchCamera({mediaType: 'photo', quality: 1});
+    if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
+      const res = await createTask(user!, transaction.id.$oid);
+      const updatedTask: HomePrepTask = {
+        ...res.task,
+        local_image_url: result.assets![0].uri!,
+        images: [...res.task.images, {image_url: result.assets![0].uri!}],
+      };
+      navigation.navigate('HomePreptask', {task: updatedTask});
+    }
+  };
+
+  const slideIn = () => {
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.backButton}>
+        <Icon name="arrow-left" size={20} color="black" />
+      </TouchableOpacity>
+
+      <Text style={styles.header}>Home Prep</Text>
+
+      <FlatList
+        data={tasks}
+        keyExtractor={item => item.id?.$oid ?? ''}
+        contentContainerStyle={styles.listContainer}
+        renderItem={({item}) => (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('HomePreptask', {task: item})}>
+            <View style={styles.taskItem}>
+              <Text style={styles.tagBelow}>{item.work_tag?.name}</Text>
+
+              {item?.images &&
+              item.images.length > 0 &&
+              item.images[0].image_thumb_url ? (
+                <Image
+                  source={{uri: item.images[0].image_thumb_url}}
+                  style={styles.squareImage}
+                />
+              ) : (
+                <View style={[styles.squareImage, styles.placeholderImage]}>
+                  <Text style={styles.placeholderText}>No Image</Text>
+                </View>
+              )}
+              <View
+                style={{flexDirection: 'row-reverse', alignItems: 'center'}}>
+                <Text style={styles.tagAbove}>{item.place_tag?.name}</Text>
+                <Icon
+                  name="tag"
+                  size={16}
+                  color="black"
+                  style={{marginRight: 5}}
+                />
+              </View>
+              <TextInput
+                style={styles.noteInput}
+                placeholder="Add note..."
+                value={item.notes}
+                placeholderTextColor="#666"
+              />
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+
+      <Animated.View
+        style={[
+          styles.cameraContainer,
+          {transform: [{translateX: slideAnim}]},
+        ]}>
+        <TouchableOpacity onPress={handleImagePick} style={styles.cameraButton}>
+          <Icon name="camera" size={20} color="black" />
+        </TouchableOpacity>
+      </Animated.View>
+
+      <TouchableOpacity onPress={slideIn} style={styles.arrowButton}>
+        <Icon name="arrow-left" size={20} color="black" />
+      </TouchableOpacity>
+    </View>
+  );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    padding: 10,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  listContainer: {
+    alignItems: 'flex-start',
+    paddingBottom: 20,
+  },
+  taskItem: {
+    marginBottom: 20,
+    alignItems: 'flex-start',
+    width: CARD_SIZE,
+  },
+  tagAbove: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    alignSelf: 'flex-start',
+  },
+  squareImage: {
+    width: CARD_SIZE,
+    height: CARD_SIZE,
+    resizeMode: 'cover',
+  },
+  placeholderImage: {
+    backgroundColor: '#ccc',
+    alignItems: 'flex-start',
+  },
+  placeholderText: {
+    color: '#666',
+  },
+  tagBelow: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
+  noteInput: {
+    width: CARD_SIZE,
+    padding: 6,
+    fontSize: 14,
+    marginTop: 5,
+  },
+  cameraContainer: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    flexDirection: 'row',
+  },
+  cameraButton: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 50,
+    elevation: 5,
+    marginLeft: 10,
+  },
+  arrowButton: {},
+});
 export default HomePrep;

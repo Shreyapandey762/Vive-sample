@@ -39,16 +39,20 @@ const LandingScreen: React.FC = () => {
   useEffect(() => {
     (async () => {
       const data = await fetchAllTransactions(user!);
-      console.log(data);
       dispatch(setTransactions(data));
     })();
   }, [modalVisible]);
 
   const handleCreate = async () => {
     if (name) {
-      await createTransaction(user!, name);
+      const transaction = await createTransaction(user!, name);
+      if (!transaction) {
+        Alert.alert('Error', 'Transaction creation failed. Please try again.');
+        return;
+      }
       setModalVisible(false);
       setName('');
+      navigation.navigate('NewTransactionScreen', {transaction});
     } else {
       Alert.alert('Error', 'Please enter a transaction title.');
     }

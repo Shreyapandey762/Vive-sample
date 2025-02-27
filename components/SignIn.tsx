@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Image,
   Alert,
+  ToastAndroid,
 } from 'react-native';
 import Vive from '../assets/Vive';
 import axios from 'axios';
@@ -25,7 +26,7 @@ const countries = [
 
 const SignIn: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState(countries[0]);
+  const [selectedCountry, setSelectedCountry] = useState(countries[1]);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -34,16 +35,16 @@ const SignIn: React.FC = () => {
 
   const handleSignIn = async () => {
     if (phoneNumber.length < 9 || phoneNumber.length > 13) {
-      Alert.alert(
-        'Validation Error',
+      ToastAndroid.show(
         'Phone number must be between 9 and 13 characters.',
+        ToastAndroid.SHORT,
       );
       return;
     }
     if (password.length < 8) {
-      Alert.alert(
-        'Validation Error',
+      ToastAndroid.show(
         'Password must be at least 8 characters long.',
+        ToastAndroid.SHORT,
       );
       return;
     }
@@ -73,21 +74,20 @@ const SignIn: React.FC = () => {
       navigation.navigate('LandingScreen');
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        Alert.alert(
-          'Sign-In Failed',
-          error.response?.data?.message || 'An error occurred',
+        ToastAndroid.show(
+          error.response?.data?.message || 'Sign in failed',
+          ToastAndroid.SHORT,
         );
         console.error('Axios Error:', error.response?.data || error.message);
       } else {
-        Alert.alert(
-          'Unexpected Error',
+        ToastAndroid.show(
           'Something went wrong. Please try again.',
+          ToastAndroid.SHORT,
         );
         console.error('Unexpected Error:', error);
       }
     }
   };
-
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.signInLink} onPress={handleSignIn}>
@@ -109,7 +109,7 @@ const SignIn: React.FC = () => {
           keyboardType="phone-pad"
         />
       </View>
-      \
+
       <View style={styles.inputContainer}>
         <TextInput
           placeholder="Password"
@@ -230,7 +230,6 @@ const styles = StyleSheet.create({
   logo: {
     width: 150,
     height: 150,
-    //  resizeMode: 'contain',
     marginBottom: 100,
   },
 });

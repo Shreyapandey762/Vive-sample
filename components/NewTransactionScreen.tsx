@@ -30,7 +30,6 @@ interface NewTransactionScreenProps {
   route: RouteProp<RootStackParamList, 'NewTransactionScreen'>;
   navigation: NewTransactionScreenNavigationProp;
 }
-
 const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
   route,
   navigation,
@@ -40,7 +39,8 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
   const [transaction1, setTransaction1] = useState<Transaction>(
     route.params.transaction,
   );
-
+  const DEFAULT_IMAGE_URL =
+    'https://vive-media.s3.us-west-2.amazonaws.com/staging/images/transaction/67c029676e497c7a392a6048/image.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAWW6QHOQBG7RJSYXW%2F20250227%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250227T092949Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=5d4bc823ea233993e83529cf886e338dd5635b5c64abe7a6332b16bd6702a048';
   useEffect(() => {
     setTransaction1(route.params.transaction);
   }, [route.params.transaction]);
@@ -60,7 +60,6 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
       await deleteTransaction(user!, transaction1.id.$oid);
     }
     navigation.navigate('LandingScreen');
-    Alert.alert('Success', 'Transaction deleted!');
   };
 
   const handleSaveTransaction = async () => {
@@ -69,7 +68,22 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
       await updateTransaction(user!, transaction1.id.$oid, transaction1);
     }
     navigation.navigate('LandingScreen');
-    Alert.alert('Success', 'Transaction saved!');
+  };
+
+  const handleMenuPress = () => {
+    Alert.alert(
+      'Remove Transaction',
+      'Are you sure want to remove this transaction',
+      [
+        {text: 'No', style: 'cancel'},
+        {
+          text: 'Yes',
+          onPress: handleDeleteTransaction,
+          style: 'destructive',
+        },
+      ],
+      {cancelable: true},
+    );
   };
 
   return (
@@ -80,37 +94,44 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
         <Icon name="arrow-left" size={24} color="black" />
       </TouchableOpacity>
 
+      <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
+        <Icon name="ellipsis-v" size={24} color="black" />
+      </TouchableOpacity>
+
       <Text style={styles.header}>Selling Transaction</Text>
 
       <TouchableOpacity onPress={handleImagePick} style={styles.cameraButton}>
         <View style={styles.plusIconContainer}>
-          <Icon name="camera" size={50} color="black" />
+          {transaction1.image_url &&
+          transaction1.image_url !== DEFAULT_IMAGE_URL ? (
+            <Image
+              source={{uri: transaction1.image_url}}
+              style={styles.imagePreview}
+            />
+          ) : (
+            <Icon name="camera" size={50} color="black" />
+          )}
         </View>
       </TouchableOpacity>
+
       <TextInput
         style={styles.title}
         onChangeText={(text: string) => {
-          // console.log(text);
+          console.log(text);
           setTransaction1(prev => ({...prev, name: text}));
         }}>
         {transaction1.name}
       </TextInput>
       <TextInput
         placeholder="Address of the house"
-        value={transaction1.full_address!}
-        // onChangeText={setFullAddress}
+        value={transaction1.full_address || ''}
         onChangeText={(text: string) =>
           setTransaction1(prev => ({...prev, full_address: text}))
         }
         placeholderTextColor="grey"
         style={styles.textInput}
       />
-      {transaction1.image_url && (
-        <Image
-          source={{uri: transaction1.image_url}}
-          style={styles.imagePreview}
-        />
-      )}
+
       <TouchableOpacity
         style={[
           styles.saveButton,
@@ -121,12 +142,7 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
         onPress={handleSaveTransaction}>
         <Text style={styles.saveButtonText}>Save Transaction</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={handleDeleteTransaction}
-        disabled={!transaction1.id}>
-        <Text style={styles.deleteButtonText}>Delete Transaction</Text>
-      </TouchableOpacity>
+
       <Text style={styles.listingheader}>ACTIVITIES</Text>
       <View style={styles.horizontalAlign}>
         <TouchableOpacity onPress={() => navigation.navigate('ListingPlan')}>
@@ -134,7 +150,10 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
             <Text style={styles.cardText}>Listing Plan</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('HomePrep')}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('HomePrep', {transaction: transaction1})
+          }>
           <View style={styles.card}>
             <Text style={styles.cardText}>Home Prep</Text>
           </View>
@@ -211,6 +230,7 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     padding: 5,
     fontSize: 16,
+    color: 'black',
   },
   imagePreview: {
     width: 100,
@@ -246,6 +266,12 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: 'white',
     fontSize: 16,
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    padding: 10,
   },
 });
 

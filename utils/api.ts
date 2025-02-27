@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {User} from '../context/UserContext';
-import {Transaction} from '../store/transactionsSlice';
+import {HomePrepTask, Transaction} from '../store/transactionsSlice';
 
 const BASE_URL = 'https://staging.gotvive.com/api/v1';
 
@@ -32,7 +32,7 @@ export const createTransaction = async (user: User, name: string) => {
       {transaction: {name: name, transaction_type: 'Seller'}},
       {headers},
     );
-    return response.data.transactions;
+    return response.data.transaction;
   } catch (error) {
     console.error('Error fetching transactions:', error);
     throw error;
@@ -47,6 +47,10 @@ export const updateTransaction = async (
   try {
     const formData = new FormData();
     formData.append('transaction[name]', transaction.name);
+    formData.append(
+      'transaction[address_attributes][full_address]',
+      transaction.full_address,
+    );
     formData.append('transaction[image]', {
       uri: transaction.image_url,
       name: 'image.png',
@@ -86,5 +90,154 @@ export const deleteTransaction = async (
     console.log(res);
   } catch (e) {
     console.error(e);
+  }
+};
+
+export const sampleFunction = async (
+  user: User,
+  transaction_id: string | null,
+) => {
+  try {
+    const headers = {
+      Authorization: `Bearer ${user.auth_token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    const res = await fetch(
+      `https://staging.gotvive.com/api/v2/homeprep_tasks?transaction_id=${transaction_id}`,
+      {
+        method: 'GET',
+        headers: headers,
+      },
+    );
+    const jsonData = await res.json();
+    return jsonData;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const getDefaultAreaTag = async (
+  user: User,
+  transaction_id: string | null,
+) => {
+  try {
+    const headers = {
+      Authorization: `Bearer ${user.auth_token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    const res = await fetch(
+      `https://staging.gotvive.com/api/v1/tags/default_areas?transaction_id=${transaction_id}&v2=true`,
+      {
+        method: 'GET',
+        headers: headers,
+      },
+    );
+    const jsonData = await res.json();
+    console.log(jsonData);
+    return jsonData;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const getDefaultWorkTag = async (
+  user: User,
+  transaction_id: string | null,
+) => {
+  try {
+    const headers = {
+      Authorization: `Bearer ${user.auth_token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    };
+    const res = await fetch(
+      `https://staging.gotvive.com/api/v1/tags/default_tasks?transaction_id=${transaction_id}&v2=true`,
+      {
+        method: 'GET',
+        headers: headers,
+      },
+    );
+    const jsonData = await res.json();
+    console.log(jsonData);
+    return jsonData;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const createTask = async (user: User, transaction_id: string) => {
+  try {
+    const response = await fetch(
+      `https://staging.gotvive.com/api/v2/homeprep_tasks?transaction_id=${transaction_id}`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${user.auth_token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      },
+    );
+
+    console.log(response);
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+export const updateHomePrepTask = async (
+  user: User,
+  payload: any,
+  homePrepTaskId: string,
+) => {
+  try {
+    const res = await fetch(
+      `https://staging.gotvive.com/api/v2/homeprep_tasks/${homePrepTaskId}`,
+      {
+        method: 'PUT',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${user.auth_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+    console.log(res);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const deleteTask = async (user: User, taskId: string) => {
+  try {
+    const res = await fetch(
+      `https://staging.gotvive.com/api/v2/homeprep_tasks/${taskId}/remove_homeprep_task`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${user.auth_token}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+    console.log(res);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error(err);
   }
 };

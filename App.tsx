@@ -9,9 +9,11 @@ import SignIn from './components/SignIn';
 import {UserProvider} from './context/UserContext';
 import UserProfile from './components/UserProfile';
 import {store} from './store';
-import {Transaction} from './store/transactionsSlice';
+import {HomePrepTask, Transaction} from './store/transactionsSlice';
 import ListingPlan from './components/ListingPlan';
 import HomePrep from './components/HomePrep';
+import HomePreptask from './components/HomePreptask';
+import {LogBox} from 'react-native';
 
 export type RootStackParamList = {
   LandingScreen: {newTransaction?: Transaction} | undefined;
@@ -20,11 +22,12 @@ export type RootStackParamList = {
   SignIn: undefined;
   UserProfile: undefined;
   ListingPlan: undefined;
-  HomePrep: undefined;
+  HomePrep: {transaction: Transaction};
+  HomePreptask: {task: HomePrepTask};
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
-
+LogBox.ignoreAllLogs();
 const App = () => {
   return (
     <Provider store={store}>
@@ -43,6 +46,7 @@ const App = () => {
             <Stack.Screen name="UserProfile" component={UserProfile} />
             <Stack.Screen name="ListingPlan" component={ListingPlan} />
             <Stack.Screen name="HomePrep" component={HomePrep} />
+            <Stack.Screen name="HomePreptask" component={HomePreptask} />
           </Stack.Navigator>
         </NavigationContainer>
       </UserProvider>

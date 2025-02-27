@@ -39,14 +39,61 @@ export type Transaction = {
   homeprep_task_images?: string[];
 };
 
+export type HomePrepTask = {
+  id?: {$oid: string};
+  transaction_id: {$oid: string};
+  work_tag?: {
+    id: {$oid: string};
+    name: string;
+    created_at: Date;
+    created_by: string | null;
+    modified_by: string | null;
+    updated_at: Date;
+  };
+  place_tag?: {
+    id: {$oid: string};
+    name: string;
+    active: boolean;
+    name_ix: string;
+    full_name: string;
+    created_at: Date;
+    created_by: string | null;
+    modified_by: string | null;
+    updated_at: Date | null;
+  };
+  status?: string;
+  images?: TaskImage[];
+  notes?: string;
+  local_image_url: string | null;
+};
+
+// {
+//   "id": {
+//       "$oid": "67bdde156e497c7a432a605a"
+//   },
+//   "name": "painting",
+//   "created_at": "2025-02-25T07:13:25.562-08:00",
+//   "created_by": null,
+//   "modified_by": null,
+//   "updated_at": "2025-02-25T07:13:25.562-08:00"
+// }
+
+export type TaskImage = {
+  id?: {$oid: string};
+  image_thumb_url?: string | null;
+  image_url?: string | null;
+};
+
 interface TransactionsState {
   transactions: Transaction[];
   transactionDetails: Transaction | null;
+  tasks: HomePrepTask[];
 }
 
 const initialState: TransactionsState = {
   transactions: [],
   transactionDetails: null,
+  tasks: [],
 };
 
 const transactionsSlice = createSlice({
@@ -56,30 +103,11 @@ const transactionsSlice = createSlice({
     setTransactions: (state, action: PayloadAction<Transaction[]>) => {
       state.transactions = action.payload;
     },
-
-    addTransaction: (state, action: PayloadAction<Transaction>) => {
-      state.transactions.push(action.payload);
-    },
-    updateTransaction: (state, action: PayloadAction<Transaction>) => {
-      state.transactions = state.transactions.map(e =>
-        e.id === action.payload.id ? action.payload : e,
-      );
-    },
-    deleteTransaction: (state, action: PayloadAction<number>) => {
-      state.transactions = state.transactions.filter(
-        e => e.id !== action.payload,
-      );
-    },
-    setTransactionDetails: (state, action: PayloadAction<Transaction>) => {
-      state.transactionDetails = action.payload;
+    setAllTasks: (state, action: PayloadAction<HomePrepTask[]>) => {
+      state.tasks = action.payload;
     },
   },
 });
 
-export const {
-  setTransactions,
-  addTransaction,
-  updateTransaction,
-  deleteTransaction,
-} = transactionsSlice.actions;
+export const {setTransactions, setAllTasks} = transactionsSlice.actions;
 export default transactionsSlice.reducer;
