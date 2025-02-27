@@ -32,7 +32,7 @@ export const createTransaction = async (user: User, name: string) => {
       {transaction: {name: name, transaction_type: 'Seller'}},
       {headers},
     );
-    return response.data.transactions;
+    return response.data.transaction;
   } catch (error) {
     console.error('Error fetching transactions:', error);
     throw error;

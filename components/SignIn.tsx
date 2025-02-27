@@ -109,7 +109,7 @@ const SignIn: React.FC = () => {
           keyboardType="phone-pad"
         />
       </View>
-      \
+
       <View style={styles.inputContainer}>
         <TextInput
           placeholder="Password"

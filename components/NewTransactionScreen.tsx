@@ -69,17 +69,16 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
       await updateTransaction(user!, transaction1.id.$oid, transaction1);
     }
     navigation.navigate('LandingScreen');
-    Alert.alert('Success', 'Transaction saved!');
   };
 
   const handleMenuPress = () => {
     Alert.alert(
-      'Actions',
-      'Select an action',
+      'Remove Transaction',
+      'Are you sure want to remove this transaction',
       [
-        {text: 'Cancel', style: 'cancel'},
+        {text: 'No', style: 'cancel'},
         {
-          text: 'Delete Transaction',
+          text: 'Yes',
           onPress: handleDeleteTransaction,
           style: 'destructive',
         },
@@ -110,7 +109,7 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
       <TextInput
         style={styles.title}
         onChangeText={(text: string) => {
-          // console.log(text);
+          console.log(text);
           setTransaction1(prev => ({...prev, name: text}));
         }}>
         {transaction1.name}
