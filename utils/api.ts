@@ -167,8 +167,22 @@ export const getDefaultWorkTag = async (
   }
 };
 
-export const createTask = async (user: User, transaction_id: string) => {
+export const createTask = async (
+  user: User,
+  transaction_id: string,
+  note?: string,
+) => {
   try {
+    console.log('hey');
+    let payload: any = {homeprep_task: {}};
+    if (note) {
+      payload = {
+        homeprep_task: {
+          notes: note,
+        },
+      };
+    }
+
     const response = await fetch(
       `https://staging.gotvive.com/api/v2/homeprep_tasks?transaction_id=${transaction_id}`,
       {
@@ -176,8 +190,9 @@ export const createTask = async (user: User, transaction_id: string) => {
         headers: {
           Accept: 'application/json',
           Authorization: `Bearer ${user.auth_token}`,
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify(payload),
       },
     );
 

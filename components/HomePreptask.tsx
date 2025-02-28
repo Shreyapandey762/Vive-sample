@@ -11,13 +11,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Platform,
   Alert,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {
-  createTask,
   deleteTask,
   getDefaultAreaTag,
   getDefaultWorkTag,
@@ -64,7 +61,9 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
       : [],
   );
 
-  const [inputText, setInputText] = useState<string>('');
+  const [inputText, setInputText] = useState<string>(
+    route.params.task.notes ?? '',
+  );
   const [selectedPill, setSelectedPill] = useState<'Work' | 'Area' | null>(
     null,
   );

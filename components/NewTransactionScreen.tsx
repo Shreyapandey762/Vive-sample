@@ -55,6 +55,7 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
       setTransaction1(prev => ({...prev, image_url: result.assets![0].uri!}));
     }
   };
+
   const handleDeleteTransaction = async () => {
     if (transaction1.id) {
       await deleteTransaction(user!, transaction1.id.$oid);
@@ -122,6 +123,7 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
         }}>
         {transaction1.name}
       </TextInput>
+
       <TextInput
         placeholder="Address of the house"
         value={transaction1.full_address || ''}
