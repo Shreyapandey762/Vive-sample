@@ -20,6 +20,9 @@ import {Transaction} from '../store/transactionsSlice';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {deleteTransaction, updateTransaction} from '../utils/api';
 import {useUser} from '../context/UserContext';
+import {Dimensions} from 'react-native';
+const {width} = Dimensions.get('window');
+const CONTAINER_SIZE = width;
 
 type NewTransactionScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -179,7 +182,6 @@ const styles = StyleSheet.create({
     left: 20,
     padding: 10,
   },
-
   card: {
     marginBottom: 10,
     alignItems: 'center',
@@ -190,7 +192,6 @@ const styles = StyleSheet.create({
     elevation: 1,
     margin: 10,
     height: '50%',
-    display: 'flex',
     flexDirection: 'column-reverse',
   },
   cameraButton: {
@@ -198,15 +199,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  // Updated plusIconContainer to take 40% of screen width/height
   plusIconContainer: {
-    width: 100,
-    height: 100,
+    width: CONTAINER_SIZE,
+    height: CONTAINER_SIZE,
     justifyContent: 'center',
     alignItems: 'center',
   },
   header: {
     fontSize: 18,
-    fontWeight: 'heavy',
+    fontWeight: 'bold',
     fontFamily: 'Comin Sans MS',
     color: '#333',
     marginTop: 20,
@@ -234,10 +236,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
   },
+  // Updated imagePreview to fill the container and use cover resize mode
   imagePreview: {
-    width: 100,
-    height: 100,
-    marginVertical: 10,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   saveButton: {
     paddingVertical: 10,
@@ -250,7 +253,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   horizontalAlign: {
-    display: 'flex',
     flexDirection: 'row',
     flex: 1,
   },
