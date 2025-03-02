@@ -26,7 +26,7 @@ import {deleteTransaction, updateTransaction} from '../utils/api';
 import {useUser} from '../context/UserContext';
 
 const {width} = Dimensions.get('window');
-const CONTAINER_SIZE = width; // Adjust if needed
+const CONTAINER_SIZE = width;
 
 type NewTransactionScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -98,8 +98,7 @@ const NewTransactionScreen: React.FC<NewTransactionScreenProps> = ({
     <KeyboardAvoidingView
       style={{flex: 1}}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={60} // adjust as needed for your header height
-    >
+      keyboardVerticalOffset={60}>
       <ScrollView contentContainerStyle={{flexGrow: 1}}>
         <View style={styles.container}>
           <View style={styles.headerRow}>
