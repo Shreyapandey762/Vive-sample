@@ -135,9 +135,12 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
       transaction_id: task.transaction_id.$oid,
       local_image_url: task.local_image_url,
       place_tag_id: selectedArea?.id,
-      work_tags: selectedWork.map(e => {
-        return {id: e.id};
-      }),
+      work_tags:
+        selectedWork.length > 0
+          ? selectedWork.map(e => {
+              return {id: e.id};
+            })
+          : [{id: null}],
     };
     console.log(payload);
     const res = await updateHomePrepTask(user!, payload, task.id!.$oid);
