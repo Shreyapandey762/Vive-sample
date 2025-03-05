@@ -45,6 +45,10 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [noteText, setNoteText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<
+    'Area' | 'Work' | 'Unassigned'
+  >('Area');
+  const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const tasks = useSelector((state: RootState) => state.transactions.tasks);
 
@@ -63,6 +67,12 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
       return () => {};
     }, [transaction, route.params, modalVisible]),
   );
+
+  const filteredTasks = tasks.filter(task => {
+    if (selectedCategory === 'Area') return task.place_tag;
+    if (selectedCategory === 'Work') return task.work_tag;
+    return !task.place_tag && !task.work_tag;
+  });
 
   const handleImagePick = async () => {
     const res = await createTask(user!, transaction.id.$oid, undefined);
@@ -109,8 +119,31 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
 
       <Text style={styles.header}>Home Prep</Text>
 
+      <TouchableOpacity
+        style={styles.pill}
+        onPress={() => setDropdownVisible(!dropdownVisible)}>
+        <Text style={styles.pillText}>{selectedCategory}</Text>
+        <Icon name="chevron-down" size={14} color="black" />
+      </TouchableOpacity>
+
+      {dropdownVisible && (
+        <View style={styles.dropdown}>
+          {['Area', 'Work', 'Unassigned'].map(category => (
+            <TouchableOpacity
+              key={category}
+              onPress={() => {
+                setSelectedCategory(category as 'Area' | 'Work' | 'Unassigned');
+                setDropdownVisible(false);
+              }}
+              style={styles.dropdownItem}>
+              <Text>{category}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
       <FlatList
-        data={tasks}
+        data={filteredTasks}
         keyExtractor={item => item.id?.$oid ?? ''}
         contentContainerStyle={styles.listContainer}
         renderItem={({item}) => (
@@ -312,6 +345,31 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#007bff',
     fontSize: 16,
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e0e0e0',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    alignSelf: 'center',
+    marginBottom: 10,
+  },
+  pillText: {
+    fontSize: 16,
+    marginRight: 5,
+  },
+  dropdown: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 10,
+    elevation: 5,
+    alignSelf: 'center',
+  },
+  dropdownItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
 });
 export default HomePrep;
