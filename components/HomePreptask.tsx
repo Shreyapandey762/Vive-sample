@@ -138,6 +138,7 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
       work_tags: selectedWork.map(e => {
         return {id: e.id};
       }),
+      notes: inputText ?? '',
     };
     console.log(payload);
     const res = await updateHomePrepTask(user!, payload, task.id!.$oid);
