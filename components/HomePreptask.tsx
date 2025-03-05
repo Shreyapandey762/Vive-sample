@@ -91,8 +91,13 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
 
   const handleTagSelection = (item: OptionType) => {
     if (selectedPill === 'Area') {
-      setSelectedArea(item);
-      setSelectedPill(null);
+      if (selectedArea === null || selectedArea.id !== item.id) {
+        setSelectedArea(item);
+        setSelectedPill(null);
+      } else {
+        setSelectedArea(null);
+        setSelectedPill(null);
+      }
     } else if (selectedPill === 'Work') {
       setSelectedWork(prevSelected => {
         const exists = prevSelected.some(tag => tag.id === item.id);
@@ -134,7 +139,7 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
     const payload = {
       transaction_id: task.transaction_id.$oid,
       local_image_url: task.local_image_url,
-      place_tag_id: selectedArea?.id,
+      place_tag_id: selectedArea ? selectedArea?.id : null,
       work_tags:
         selectedWork.length > 0
           ? selectedWork.map(e => {
@@ -189,7 +194,11 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
               keyExtractor={item => item.id}
               renderItem={({item}) => (
                 <TouchableOpacity
-                  style={styles.optionPill}
+                  style={
+                    selectedArea && item.id === selectedArea.id
+                      ? styles.pill
+                      : styles.optionPill
+                  }
                   onPress={() => handleTagSelection(item)}>
                   <Text style={styles.optionText}>{item.name}</Text>
                 </TouchableOpacity>
