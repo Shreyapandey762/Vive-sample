@@ -11,13 +11,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Platform,
   Alert,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {
-  createTask,
   deleteTask,
   getDefaultAreaTag,
   getDefaultWorkTag,
@@ -64,7 +61,9 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
       : [],
   );
 
-  const [inputText, setInputText] = useState<string>('');
+  const [inputText, setInputText] = useState<string>(
+    route.params.task.notes ?? '',
+  );
   const [selectedPill, setSelectedPill] = useState<'Work' | 'Area' | null>(
     null,
   );
@@ -92,8 +91,13 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
 
   const handleTagSelection = (item: OptionType) => {
     if (selectedPill === 'Area') {
-      setSelectedArea(item);
-      setSelectedPill(null);
+      if (selectedArea === null || selectedArea.id !== item.id) {
+        setSelectedArea(item);
+        setSelectedPill(null);
+      } else {
+        setSelectedArea(null);
+        setSelectedPill(null);
+      }
     } else if (selectedPill === 'Work') {
       setSelectedWork(prevSelected => {
         const exists = prevSelected.some(tag => tag.id === item.id);
@@ -135,10 +139,13 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
     const payload = {
       transaction_id: task.transaction_id.$oid,
       local_image_url: task.local_image_url,
-      place_tag_id: selectedArea?.id,
-      work_tags: selectedWork.map(e => {
-        return {id: e.id};
-      }),
+      place_tag_id: selectedArea ? selectedArea?.id : null,
+      work_tags:
+        selectedWork.length > 0
+          ? selectedWork.map(e => {
+              return {id: e.id};
+            })
+          : [{id: null}],
     };
     console.log(payload);
     const res = await updateHomePrepTask(user!, payload, task.id!.$oid);
@@ -187,7 +194,11 @@ const HomePreptask: React.FC<HomePrepTaskProps> = ({route, navigation}) => {
               keyExtractor={item => item.id}
               renderItem={({item}) => (
                 <TouchableOpacity
-                  style={styles.optionPill}
+                  style={
+                    selectedArea && item.id === selectedArea.id
+                      ? styles.pill
+                      : styles.optionPill
+                  }
                   onPress={() => handleTagSelection(item)}>
                   <Text style={styles.optionText}>{item.name}</Text>
                 </TouchableOpacity>

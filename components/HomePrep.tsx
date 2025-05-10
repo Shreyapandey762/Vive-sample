@@ -9,6 +9,8 @@ import {
   Animated,
   TextInput,
   Dimensions,
+  Modal,
+  Alert,
 } from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -41,6 +43,9 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
   const dispatch = useDispatch();
   const slideAnim = useState(new Animated.Value(100))[0];
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [noteText, setNoteText] = useState('');
+
   const tasks = useSelector((state: RootState) => state.transactions.tasks);
 
   useFocusEffect(
@@ -56,19 +61,33 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
 
       apiCall();
       return () => {};
-    }, [transaction, route.params]),
+    }, [transaction, route.params, modalVisible]),
   );
 
   const handleImagePick = async () => {
+    const res = await createTask(user!, transaction.id.$oid, undefined);
+
     const result = await launchCamera({mediaType: 'photo', quality: 1});
     if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
-      const res = await createTask(user!, transaction.id.$oid);
       const updatedTask: HomePrepTask = {
         ...res.task,
         local_image_url: result.assets![0].uri!,
         images: [...res.task.images, {image_url: result.assets![0].uri!}],
       };
       navigation.navigate('HomePreptask', {task: updatedTask});
+    }
+  };
+
+  const handleSaveNote = async () => {
+    try {
+      const res = await createTask(user!, transaction.id.$oid, noteText);
+
+      setModalVisible(false);
+      setNoteText('');
+      Alert.alert('Success', 'Note updated successfully.');
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Failed to update note.');
     }
   };
 
@@ -126,7 +145,7 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
                 style={styles.noteInput}
                 placeholder="Add note..."
                 value={item.notes}
-                placeholderTextColor="#666"
+                placeholderTextColor="black"
               />
             </View>
           </TouchableOpacity>
@@ -141,11 +160,45 @@ const HomePrep: React.FC<HomePrepProps> = ({route, navigation}) => {
         <TouchableOpacity onPress={handleImagePick} style={styles.cameraButton}>
           <Icon name="camera" size={20} color="black" />
         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={styles.cameraButton}>
+          <Icon name="edit" size={20} color="black" />
+        </TouchableOpacity>
       </Animated.View>
 
       <TouchableOpacity onPress={slideIn} style={styles.arrowButton}>
         <Icon name="arrow-left" size={20} color="black" />
       </TouchableOpacity>
+
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalHeader}>Edit Note</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Enter note..."
+              value={noteText}
+              onChangeText={setNoteText}
+              placeholderTextColor="#666"
+            />
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={styles.button}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSaveNote} style={styles.button}>
+                <Text style={styles.buttonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -206,6 +259,7 @@ const styles = StyleSheet.create({
     padding: 6,
     fontSize: 14,
     marginTop: 5,
+    color: 'black',
   },
   cameraContainer: {
     position: 'absolute',
@@ -221,5 +275,43 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   arrowButton: {},
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    width: '80%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 8,
+    elevation: 5,
+  },
+  modalHeader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  textInput: {
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  buttonText: {
+    color: '#007bff',
+    fontSize: 16,
+  },
 });
 export default HomePrep;
